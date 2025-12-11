@@ -163,6 +163,8 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin-top: 25px;
+        /* Teksti i saktë i kërkuar */
+        content: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
         display: none; /* Fshehur fillimisht */
     }
 
@@ -342,40 +344,54 @@
   </div>
 
 <script>
-    // Mbajtësi i statusit të projektit aktual. Fillojmë me ABH siç u kërkua.
     let currentProject = 'abh';
-    const ACTIVE_PROJECTS = {
+
+    // Konfigurimi i të gjitha projekteve. Vetëm ato me 'converter' janë aktive.
+    const PROJECTS_CONFIG = {
         'ipsos': {
             fieldsCount: 11,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (11 fusha: VPN_User, VPN_Pass, 2FA_Email, Ingress_User, Ingress_Pass, WebMail_Pass, WebMail_2FA_Pass, SIP_User, SIP_Pass, Shteti, Emri):",
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
-            converter: formatIpsos,
+            converter: formatIpsos, // Aktiv
             fileNamePrefix: '_data',
         },
         'abh': {
             fieldsCount: 5,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
-            converter: formatABH,
+            converter: formatABH, // Aktiv (Për t'u rregulluar më vonë sipas kërkesës tuaj)
             fileNamePrefix: '',
         },
         'usuma': {
-            fieldsCount: 7, // Supozojmë 7 fusha bazuar në formatet standarde
-            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (7 fusha: Emri, VPN_User, VPN_Pass, WebMail_User, WebMail_Pass, Sip_Ext, Sip_Pass):",
+            fieldsCount: 7,
+            helper: "Projekti joaktiv. Zgjidhni Ipsos ose ABH.",
             placeholder: "Lori Hysa\tlhysa\tP@ssword!1\tlhysa@usuma.net\tW@bPass!1\t2001\tSipPass-2024",
-            converter: formatUsuma,
+            converter: null, // Joaktiv
             fileNamePrefix: '_usuma_data',
         },
         'leyhausen': {
-            fieldsCount: 6, // Supozojmë 6 fusha
-            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (6 fusha: Emri, User_Name, Password, Ext, Pass_Ext, Host):",
+            fieldsCount: 6,
+            helper: "Projekti joaktiv. Zgjidhni Ipsos ose ABH.",
             placeholder: "Ardit Gashi\tagashi\tAgashi!2024\t105\tExtPass!24\tvoip.leyhausen.de",
-            converter: formatLeyhausen,
+            converter: null, // Joaktiv
             fileNamePrefix: '_leyhausen_user',
-        }
+        },
+        // Të gjitha projektet e tjera janë Joaktive
+        'imug': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'imfield': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'kraemer': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'ingress': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'immler': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'salesupplay': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'kantar-de': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'tns': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'kantar-forsta': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'kantar-au': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
+        'otto': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
     };
 
-    // --- LOGJIKA E KONVERTIMIT SPECIFIK ---
+
+    // --- LOGJIKA E KONVERTIMIT SPECIFIK (vetëm për projektet aktive) ---
 
     // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha)
     function formatIpsos(fields) {
@@ -389,10 +405,10 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
-        // const webMail2FaPass = fields[6]; // Nuk përdoret direkt në output, por është në input
+        // fields[6] është WebMail_2FA_Pass
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
-        // const country = fields[9]; // Nuk përdoret direkt në output
+        // fields[9] është Shteti
         const name = fields[10];
 
         const output = 
@@ -450,83 +466,21 @@ ABH Domain: eu.sip.ssl17.net`;
         
         return output;
     }
-
-    // 3. Funksioni për formatimin e të dhënave të Usuma (7 fusha - I ri)
-    function formatUsuma(fields) {
-        if (fields.length !== 7) {
-            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 7 fusha, u gjetën ${fields.length}.`;
-        }
-
-        const name = fields[0];
-        const vpnUser = fields[1];
-        const vpnPass = fields[2];
-        const webMailUser = fields[3];
-        const webMailPass = fields[4];
-        const sipExt = fields[5];
-        const sipPass = fields[6];
-
-        const output = 
-`Name: ${name}
-Project: Usuma
-
---------------------------------------
-VPN Access
-Username: ${vpnUser}
-Password: ${vpnPass}
-VPN Host: vpn.usuma.de
---------------------------------------
-WebMail Access
-Username: ${webMailUser}
-Password: ${webMailPass}
-WebMail Link: https://webmail.usuma.de
---------------------------------------
-SIP Extension
-Extension: ${sipExt}
-Password: ${sipPass}
-SIP Server: sip.usuma.net`;
-        
-        return output;
-    }
-
-    // 4. Funksioni për formatimin e të dhënave të Leyhausen (6 fusha - I ri)
-    function formatLeyhausen(fields) {
-        if (fields.length !== 6) {
-            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 6 fusha, u gjetën ${fields.length}.`;
-        }
-
-        const name = fields[0];
-        const userName = fields[1];
-        const password = fields[2];
-        const extension = fields[3];
-        const passExt = fields[4];
-        const host = fields[5];
-
-        const output = 
-`Name: ${name}
-Project: Leyhausen
-
---------------------------------------
-ViciDial Login
-Username: ${userName}
-Password: ${password}
---------------------------------------
-SIP/IAX Extension
-Extension: ${extension}
-Password: ${passExt}
-Host: ${host}`;
-        
-        return output;
-    }
+    
+    // Funksionet e formatimit për projektet Joaktive
+    // Këto nuk thirren në praktikë, pasi 'converter' është null në PROJECTS_CONFIG.
+    function formatUsuma(fields) { return "ERROR: Usuma is not active."; }
+    function formatLeyhausen(fields) { return "ERROR: Leyhausen is not active."; }
 
 
     // --- LOGJIKA KRYESORE E APLIKACIONIT ---
 
     // Funksioni për menaxhimin e konvertimit
     function handleConvert() {
-        const projectConfig = ACTIVE_PROJECTS[currentProject];
+        const projectConfig = PROJECTS_CONFIG[currentProject];
 
         if (!projectConfig || !projectConfig.converter) {
-            // Kontrolli për projektet joaktive (pa converter)
+            // Nuk bëjmë asgjë, projekti është joaktiv
             return;
         }
 
@@ -535,17 +489,16 @@ Host: ${host}`;
         const errorElement = document.getElementById('errorMessage');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        const rawInput = inputElement.value; // Mos e përdor .trim() këtu nëse duam TAB-a në fund
+        const rawInput = inputElement.value;
         
         // Ndarja e fushave me TAB
         let fields = rawInput.split('\t').map(f => f.trim());
         
-        // Eliminon stringjet bosh që mund të krijohen nga ndarjet e tepërta
+        // Eliminon stringjet bosh në fund nëse janë krijuar nga ndarjet e tepërta
         if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
             fields.pop();
         }
 
-        // Kujdes: Përdorim numrin e fushave të konfiguruara
         if (fields.length !== projectConfig.fieldsCount) {
              errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB. U gjetën ${fields.length}.`;
              errorElement.style.display = 'block';
@@ -580,9 +533,8 @@ Host: ${host}`;
     // Funksioni për shkarkimin e skedarit TXT
     function downloadTxt() {
         const outputContent = document.getElementById('outputContent').innerText;
-        const projectConfig = ACTIVE_PROJECTS[currentProject] || { fileNamePrefix: 'formatted_data' };
+        const projectConfig = PROJECTS_CONFIG[currentProject] || { fileNamePrefix: 'formatted_data' };
         
-        // Përpiqet të gjejë emrin nga rreshti 'Name:'
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
         const defaultName = 'formatted_user';
         let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
@@ -630,10 +582,14 @@ Host: ${host}`;
         titleElement.innerHTML = `${projectName} Formatter <span id="projectStatus" class="status-badge"></span>`;
         const newStatusBadge = document.getElementById('projectStatus');
         
-        const projectConfig = ACTIVE_PROJECTS[projectId];
+        const projectConfig = PROJECTS_CONFIG[projectId];
+        
+        // Mbajmë rendin e saktë të mesazhit siç kërkohet
+        inactiveMessage.textContent = "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
+
 
         if (projectConfig && projectConfig.converter) {
-            // Projekti është AKTIV (me funksion konvertimi)
+            // Projekti është AKTIV (Ipsos ose ABH)
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
@@ -663,7 +619,7 @@ Host: ${host}`;
             
             // Fsheh inputin dhe outputin nëse është joaktiv
             dataInput.value = '';
-            outputContent.innerText = "Projekti është joaktiv. Ju lutemi zgjidhni ABH ose Ipsos për të parë shembuj funksionalë.";
+            outputContent.innerText = ""; // Pastrohet outputi
         }
     }
 
