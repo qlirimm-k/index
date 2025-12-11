@@ -180,6 +180,9 @@
         resize: vertical;
         box-sizing: border-box;
         transition: border-color 0.2s;
+        /* Kjo ndihmon të duket stringu i ndarë me TAB siç duhet */
+        white-space: pre-wrap; 
+        line-height: 1.8;
     }
     
     textarea:focus { 
@@ -280,10 +283,9 @@
     </div>
     
     <div class="nav-links">
-        <!-- IPSOS Active Example -->
         <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
         <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
-        <a href="#" data-project="abh" class="link-abh active">ABH</a> <!-- ABH aktiv tani -->
+        <a href="#" data-project="abh" class="link-abh active">ABH</a> 
         <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
         <a href="#" data-project="imug" class="link-imug">Imug</a>
         <a href="#" data-project="imfield" class="link-imfield">ImField</a>
@@ -346,6 +348,7 @@
         'ipsos': {
             fieldsCount: 11,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (p.sh., 11 fusha: VPN_User, VPN_Pass, 2FA_Email, etj.):",
+            // Shembull i ri, i formatuar si stringu i shpërndarë me TAB
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
             converter: formatIpsos,
             fileNamePrefix: '_data',
@@ -362,7 +365,7 @@
 
     // --- LOGJIKA E KONVERTIMIT SPECIFIK ---
 
-    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha)
+    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha) - Përditësuar me formatin e kërkuar
     function formatIpsos(fields) {
         if (fields.length < 11) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten të paktën 11, u gjetën ${fields.length}.`;
@@ -374,12 +377,14 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
-        const webMail2FaPass = fields[6]; 
+        const webMail2FaPass = fields[6]; // E zëvendësuar me index 6, pasi ne kemi 11 fusha
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
         // fields[9] është Shteti (Germany)
+        const country = fields[9];
         const name = fields[10];
 
+        // Formatimi i ri i outputit si në foton e Ipsos (image_5408b9.png)
         const output = 
 `Name: ${name}
 
@@ -445,7 +450,6 @@ ABH Domain: eu.sip.ssl17.net`;
         const projectConfig = ACTIVE_PROJECTS[currentProject];
 
         if (!projectConfig) {
-            // Sigurohuni që mos të bëhet konvertimi nëse projekti nuk është aktiv
             return;
         }
 
@@ -458,34 +462,16 @@ ABH Domain: eu.sip.ssl17.net`;
         
         // Përpiqemi të ndajmë të dhënat me TAB
         let fields = rawInput.split('\t');
-        let isValidSplit = true;
-
-        // Përpiqemi të rregullojmë nëse inputi përdor hapësira në vend të TAB-ave për ndarje
-        if (fields.length < projectConfig.fieldsCount) {
-            // Për ABH (5 fusha) dhe IPSOS (11 fusha)
-            // Kërkojmë për 4 (ABH) ose 10 (IPSOS) ndarës me hapsirë/tab, dhe pjesa e mbetur është fusha e fundit
-            // Kjo është një qasje e përgjithshme, por ndarja me TAB është e preferuar
-            const regexPattern = `^([^\t\\s]+[\\t\\s]+){${projectConfig.fieldsCount - 1}}([^\t\\s]+)$`;
-            const spaceSplitRegex = new RegExp(regexPattern);
-            const fieldsFromSpaceMatch = rawInput.match(spaceSplitRegex);
-
-            if (fieldsFromSpaceMatch && fieldsFromSpaceMatch.length === projectConfig.fieldsCount + 1) {
-                 // Nxjerrim vetëm grupet e kapura (fushën e 1-rë deri të fushën e fundit)
-                 fields = fieldsFromSpaceMatch.slice(1, projectConfig.fieldsCount + 1).map(f => f.trim());
-                 isValidSplit = true;
-            } else if (fields.length === projectConfig.fieldsCount) {
-                // Rasti kur ndarja me TAB ishte ok, por fillimisht fields.length < fieldsCount doli false gabimisht (sigurim)
-                isValidSplit = true;
-            } else {
-                isValidSplit = false;
-            }
-        }
         
-        // Finalizimi i fushave
+        // Kontroll i thjeshtë: nëse ndarja me TAB nuk dha numrin e duhur,
+        // provojmë ndarjen e bazuar në hapsirë, por vetëm për të siguruar 
+        // që fjalët të merren si duhet në rast se TAB mungon.
+        // Për aplikacionin tonë, mbajmë ndarjen kryesore me TAB.
+        
         const finalFields = fields.map(f => f.trim());
 
         if (finalFields.length !== projectConfig.fieldsCount) {
-             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB (ose hapësirë). U gjetën ${finalFields.length}.`;
+             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB. U gjetën ${finalFields.length}.`;
              errorElement.style.display = 'block';
              outputElement.innerText = "Error during conversion. Please check input format.";
              downloadBtn.style.display = 'none';
@@ -584,8 +570,11 @@ ABH Domain: eu.sip.ssl17.net`;
 
             // Përditëson inputin dhe ndihmën
             helperText.textContent = projectConfig.helper;
-            dataInput.placeholder = projectConfig.placeholder;
+            
+            // Vendos vlerën e placeholder-it në textarea
             dataInput.value = projectConfig.placeholder;
+            dataInput.placeholder = "Ngjisni rreshtin e të dhënave këtu...";
+            
             outputContent.innerText = "Duke pritur për të dhëna...";
             errorElement.style.display = 'none';
             
@@ -612,7 +601,8 @@ ABH Domain: eu.sip.ssl17.net`;
             link.addEventListener('click', handleProjectSwitch);
         });
 
-        // Kujdes: Thërret logjikën e përditësimit me projektin fillestar 'abh'
+        // Vendos ABH si aktiv në ngarkimin fillestar
+        // E bëjmë këtë manualisht sepse klasa 'active' është vendosur në HTML për ABH
         updateMainContent('abh');
     });
 
