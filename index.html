@@ -347,8 +347,7 @@
     const ACTIVE_PROJECTS = {
         'ipsos': {
             fieldsCount: 11,
-            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (p.sh., 11 fusha: VPN_User, VPN_Pass, 2FA_Email, etj.):",
-            // Shembull i ri, i formatuar si stringu i shpërndarë me TAB
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (11 fusha: VPN_User, VPN_Pass, 2FA_Email, Ingress_User, Ingress_Pass, WebMail_Pass, WebMail_2FA_Pass, SIP_User, SIP_Pass, Shteti, Emri):",
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
             converter: formatIpsos,
             fileNamePrefix: '_data',
@@ -359,16 +358,29 @@
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
             converter: formatABH,
             fileNamePrefix: '',
+        },
+        'usuma': {
+            fieldsCount: 7, // Supozojmë 7 fusha bazuar në formatet standarde
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (7 fusha: Emri, VPN_User, VPN_Pass, WebMail_User, WebMail_Pass, Sip_Ext, Sip_Pass):",
+            placeholder: "Lori Hysa\tlhysa\tP@ssword!1\tlhysa@usuma.net\tW@bPass!1\t2001\tSipPass-2024",
+            converter: formatUsuma,
+            fileNamePrefix: '_usuma_data',
+        },
+        'leyhausen': {
+            fieldsCount: 6, // Supozojmë 6 fusha
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (6 fusha: Emri, User_Name, Password, Ext, Pass_Ext, Host):",
+            placeholder: "Ardit Gashi\tagashi\tAgashi!2024\t105\tExtPass!24\tvoip.leyhausen.de",
+            converter: formatLeyhausen,
+            fileNamePrefix: '_leyhausen_user',
         }
-        // Projektet e tjera do të përdorin mesazhin joaktiv
     };
 
     // --- LOGJIKA E KONVERTIMIT SPECIFIK ---
 
-    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha) - Përditësuar me formatin e kërkuar
+    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha)
     function formatIpsos(fields) {
-        if (fields.length < 11) {
-            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten të paktën 11, u gjetën ${fields.length}.`;
+        if (fields.length !== 11) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 11, u gjetën ${fields.length}.`;
         }
 
         const vpnUser = fields[0]; 
@@ -377,14 +389,12 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
-        const webMail2FaPass = fields[6]; // E zëvendësuar me index 6, pasi ne kemi 11 fusha
+        // const webMail2FaPass = fields[6]; // Nuk përdoret direkt në output, por është në input
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
-        // fields[9] është Shteti (Germany)
-        const country = fields[9];
+        // const country = fields[9]; // Nuk përdoret direkt në output
         const name = fields[10];
 
-        // Formatimi i ri i outputit si në foton e Ipsos (image_5408b9.png)
         const output = 
 `Name: ${name}
 
@@ -416,18 +426,16 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
 
     // 2. Funksioni për formatimin e të dhënave të ABH (5 fusha)
     function formatABH(fields) {
-        // Shqyrto numrin e fushave
         if (fields.length !== 5) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 5 fusha, u gjetën ${fields.length}.`;
         }
 
-        const name = fields[0]; // Emine Ibishi
-        const abhUser = fields[1]; // Agent_Bambus16
-        const abhPass = fields[2]; // Bambus16
-        const iaxExt = fields[3]; // 935912
-        const iaxPass = fields[4]; // E4}s4%L1|
+        const name = fields[0];
+        const abhUser = fields[1];
+        const abhPass = fields[2];
+        const iaxExt = fields[3];
+        const iaxPass = fields[4];
 
-        // Outputi sipas formatit të kërkuar (ABH Emine Ibishi.txt - Notepad)
         const output = 
 `Name:  ${name}
 
@@ -443,13 +451,82 @@ ABH Domain: eu.sip.ssl17.net`;
         return output;
     }
 
+    // 3. Funksioni për formatimin e të dhënave të Usuma (7 fusha - I ri)
+    function formatUsuma(fields) {
+        if (fields.length !== 7) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 7 fusha, u gjetën ${fields.length}.`;
+        }
+
+        const name = fields[0];
+        const vpnUser = fields[1];
+        const vpnPass = fields[2];
+        const webMailUser = fields[3];
+        const webMailPass = fields[4];
+        const sipExt = fields[5];
+        const sipPass = fields[6];
+
+        const output = 
+`Name: ${name}
+Project: Usuma
+
+--------------------------------------
+VPN Access
+Username: ${vpnUser}
+Password: ${vpnPass}
+VPN Host: vpn.usuma.de
+--------------------------------------
+WebMail Access
+Username: ${webMailUser}
+Password: ${webMailPass}
+WebMail Link: https://webmail.usuma.de
+--------------------------------------
+SIP Extension
+Extension: ${sipExt}
+Password: ${sipPass}
+SIP Server: sip.usuma.net`;
+        
+        return output;
+    }
+
+    // 4. Funksioni për formatimin e të dhënave të Leyhausen (6 fusha - I ri)
+    function formatLeyhausen(fields) {
+        if (fields.length !== 6) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 6 fusha, u gjetën ${fields.length}.`;
+        }
+
+        const name = fields[0];
+        const userName = fields[1];
+        const password = fields[2];
+        const extension = fields[3];
+        const passExt = fields[4];
+        const host = fields[5];
+
+        const output = 
+`Name: ${name}
+Project: Leyhausen
+
+--------------------------------------
+ViciDial Login
+Username: ${userName}
+Password: ${password}
+--------------------------------------
+SIP/IAX Extension
+Extension: ${extension}
+Password: ${passExt}
+Host: ${host}`;
+        
+        return output;
+    }
+
+
     // --- LOGJIKA KRYESORE E APLIKACIONIT ---
 
     // Funksioni për menaxhimin e konvertimit
     function handleConvert() {
         const projectConfig = ACTIVE_PROJECTS[currentProject];
 
-        if (!projectConfig) {
+        if (!projectConfig || !projectConfig.converter) {
+            // Kontrolli për projektet joaktive (pa converter)
             return;
         }
 
@@ -458,20 +535,19 @@ ABH Domain: eu.sip.ssl17.net`;
         const errorElement = document.getElementById('errorMessage');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        const rawInput = inputElement.value.trim();
+        const rawInput = inputElement.value; // Mos e përdor .trim() këtu nëse duam TAB-a në fund
         
-        // Përpiqemi të ndajmë të dhënat me TAB
-        let fields = rawInput.split('\t');
+        // Ndarja e fushave me TAB
+        let fields = rawInput.split('\t').map(f => f.trim());
         
-        // Kontroll i thjeshtë: nëse ndarja me TAB nuk dha numrin e duhur,
-        // provojmë ndarjen e bazuar në hapsirë, por vetëm për të siguruar 
-        // që fjalët të merren si duhet në rast se TAB mungon.
-        // Për aplikacionin tonë, mbajmë ndarjen kryesore me TAB.
-        
-        const finalFields = fields.map(f => f.trim());
+        // Eliminon stringjet bosh që mund të krijohen nga ndarjet e tepërta
+        if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
+            fields.pop();
+        }
 
-        if (finalFields.length !== projectConfig.fieldsCount) {
-             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB. U gjetën ${finalFields.length}.`;
+        // Kujdes: Përdorim numrin e fushave të konfiguruara
+        if (fields.length !== projectConfig.fieldsCount) {
+             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB. U gjetën ${fields.length}.`;
              errorElement.style.display = 'block';
              outputElement.innerText = "Error during conversion. Please check input format.";
              downloadBtn.style.display = 'none';
@@ -481,7 +557,7 @@ ABH Domain: eu.sip.ssl17.net`;
         // Procesimi i Konvertimit
         errorElement.style.display = 'none';
         try {
-            const formattedData = projectConfig.converter(finalFields);
+            const formattedData = projectConfig.converter(fields);
             
             if (formattedData.startsWith("ERROR")) {
                 errorElement.innerHTML = formattedData.replace("ERROR: ", "");
@@ -496,7 +572,7 @@ ABH Domain: eu.sip.ssl17.net`;
         } catch (e) {
             errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
             errorElement.style.display = 'block';
-            outputElement.innerText = "Internal error.";
+            outputContent.innerText = "Internal error.";
             downloadBtn.style.display = 'none';
         }
     }
@@ -504,17 +580,15 @@ ABH Domain: eu.sip.ssl17.net`;
     // Funksioni për shkarkimin e skedarit TXT
     function downloadTxt() {
         const outputContent = document.getElementById('outputContent').innerText;
-        const projectConfig = ACTIVE_PROJECTS[currentProject] || { fileNamePrefix: '_data' };
+        const projectConfig = ACTIVE_PROJECTS[currentProject] || { fileNamePrefix: 'formatted_data' };
         
         // Përpiqet të gjejë emrin nga rreshti 'Name:'
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
         const defaultName = 'formatted_user';
-        let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s/g, '_') : defaultName;
+        let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
 
-        // Shton prefiksin e skedarit (p.sh. '_data' për Ipsos, ose asgjë për ABH)
         const fileName = `${baseName}${projectConfig.fileNamePrefix}.txt`;
         
-        // Krijimi i Blob dhe linku i shkarkimit
         const blob = new Blob([outputContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         
@@ -524,7 +598,7 @@ ABH Domain: eu.sip.ssl17.net`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url); // Pastron URL-në e krijuar
+        URL.revokeObjectURL(url);
     }
 
     // Funksioni për menaxhimin e klikimeve në sidebar
@@ -544,7 +618,6 @@ ABH Domain: eu.sip.ssl17.net`;
     // Funksioni për të përditësuar pamjen kryesore bazuar në projektin e zgjedhur
     function updateMainContent(projectId) {
         const titleElement = document.getElementById('projectTitle');
-        const statusBadge = document.getElementById('projectStatus');
         const formatterContainer = document.getElementById('formatterContainer');
         const inactiveMessage = document.getElementById('inactiveMessage');
         const dataInput = document.getElementById('dataInput');
@@ -559,8 +632,8 @@ ABH Domain: eu.sip.ssl17.net`;
         
         const projectConfig = ACTIVE_PROJECTS[projectId];
 
-        if (projectConfig) {
-            // Projekti është AKTIV
+        if (projectConfig && projectConfig.converter) {
+            // Projekti është AKTIV (me funksion konvertimi)
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
@@ -570,8 +643,6 @@ ABH Domain: eu.sip.ssl17.net`;
 
             // Përditëson inputin dhe ndihmën
             helperText.textContent = projectConfig.helper;
-            
-            // Vendos vlerën e placeholder-it në textarea
             dataInput.value = projectConfig.placeholder;
             dataInput.placeholder = "Ngjisni rreshtin e të dhënave këtu...";
             
@@ -589,6 +660,10 @@ ABH Domain: eu.sip.ssl17.net`;
             
             formatterContainer.style.display = 'none';
             inactiveMessage.style.display = 'block';
+            
+            // Fsheh inputin dhe outputin nëse është joaktiv
+            dataInput.value = '';
+            outputContent.innerText = "Projekti është joaktiv. Ju lutemi zgjidhni ABH ose Ipsos për të parë shembuj funksionalë.";
         }
     }
 
@@ -602,7 +677,6 @@ ABH Domain: eu.sip.ssl17.net`;
         });
 
         // Vendos ABH si aktiv në ngarkimin fillestar
-        // E bëjmë këtë manualisht sepse klasa 'active' është vendosur në HTML për ABH
         updateMainContent('abh');
     });
 
