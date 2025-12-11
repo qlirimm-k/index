@@ -3,12 +3,12 @@
 <head>
   <title>User Formatter Modern UI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
         --sidebar-bg: #1e293b;
         --sidebar-text: #e2e8f0;
-        --accent-color: #3b82f6; /* Modern Blue */
+        --accent-color: #3b82f6;
         --accent-hover: #2563eb;
         --bg-color: #f1f5f9;
         --card-bg: #ffffff;
@@ -24,7 +24,6 @@
         color: var(--text-main);
     }
     
-    /* Global Container Setup (to handle login screen) */
     #appContainer {
         display: flex;
         width: 100%;
@@ -32,9 +31,8 @@
         transition: opacity 0.3s ease;
     }
 
-    /* --- LOGIN SCREEN STYLING --- */
     #loginScreen {
-        display: none; /* Controlled by JS */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
@@ -108,7 +106,6 @@
         font-size: 1.1rem;
     }
     
-    /* --- SIDEBAR STYLING --- */
     .sidebar {
       width: 280px; 
       background: var(--sidebar-bg); 
@@ -137,11 +134,10 @@
       text-transform: uppercase;
     }
 
-    /* Boxed Menu Items */
     .nav-links {
         display: flex;
         flex-direction: column;
-        gap: 8px; /* Space between boxes */
+        gap: 8px;
     }
 
     .sidebar a {
@@ -152,29 +148,26 @@
       padding: 12px 16px; 
       font-size: 14px;
       font-weight: 500;
-      background: rgba(255,255,255,0.03); /* Subtle background */
-      border-radius: 8px; /* Rounded corners */
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
       border: 1px solid transparent;
       transition: all 0.2s ease;
     }
 
-    /* Hover State */
     .sidebar a:hover { 
       background: rgba(255,255,255,0.1);
       color: #fff;
-      transform: translateX(3px); /* Slight movement */
+      transform: translateX(3px);
     }
 
-    /* Active State (Selected Project) */
     .sidebar a.active {
       background: var(--accent-color);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); /* Glow effect */
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
       font-weight: 600;
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Icon placeholder (optional) */
     .sidebar a::before {
         content: '';
         display: inline-block;
@@ -187,7 +180,6 @@
     }
     .sidebar a.active::before { opacity: 1; background-color: #fff; }
 
-    /* --- MAIN CONTENT --- */
     .content { 
         flex: 1; 
         padding: 40px; 
@@ -228,11 +220,10 @@
     }
     
     .status-inactive {
-        background: #ffe4e6; /* Light Red */
-        color: #be123c; /* Dark Red */
+        background: #ffe4e6;
+        color: #be123c;
     }
 
-    /* Container i Formës dhe Output-it - e fshehim në rast se projekti nuk është aktiv */
     #formatterContainer {
         transition: opacity 0.3s ease;
     }
@@ -247,7 +238,7 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin-top: 25px;
-        display: none; /* Fshehur fillimisht */
+        display: none;
     }
 
 
@@ -264,7 +255,6 @@
         resize: vertical;
         box-sizing: border-box;
         transition: border-color 0.2s;
-        /* Kjo ndihmon të duket stringu i ndarë me TAB siç duhet */
         white-space: pre-wrap; 
         line-height: 1.8;
     }
@@ -296,10 +286,9 @@
     button:hover { background: var(--accent-hover); transform: translateY(-1px); }
     button:active { transform: translateY(0); }
 
-    /* Output Area */
     .output-container {
         margin-top: 30px;
-        background: #1e293b; /* Dark terminal style */
+        background: #1e293b;
         border-radius: 8px;
         overflow: hidden;
     }
@@ -322,19 +311,19 @@
         white-space: pre-wrap;
         font-size: 14px;
         line-height: 1.5;
-        min-height: 150px; /* Shtohet lartësia minimale për të shfaqur rezultatin */
+        min-height: 150px;
         overflow-x: auto;
     }
 
     .download-btn {
-        background: #10b981; /* Green */
+        background: #10b981;
         box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
         margin-left: 10px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        height: 38px; /* match button height */
+        height: 38px;
         padding: 0 20px;
         border-radius: 6px;
         color: white;
@@ -346,24 +335,23 @@
     .helper-text { font-size: 0.9rem; color: #64748b; margin-bottom: 8px; }
     
     .error-message {
-        color: #dc2626; /* Red */
+        color: #dc2626;
         background: #fee2e2;
         padding: 10px;
         border-radius: 6px;
         margin-bottom: 15px;
         border: 1px solid #fca5a5;
         font-weight: 500;
-        display: none; /* Fshehur si fillim */
+        display: none;
     }
 
   </style>
 </head>
 <body>
 
-  <!-- 1. Faqja e Hyrjes (Login) -->
   <div id="loginScreen">
     <div class="login-card">
-        <h3>Hyrja në Panelin e Kontrollit</h3>
+        <h3>PROJECT GENERATOR</h3>
         
         <div id="loginError"></div>
 
@@ -382,12 +370,10 @@
   </div>
 
 
-  <!-- 2. Kontenieri i Dashboard-it -->
   <div id="appContainer" style="display: none;">
-    <!-- Sidebar Modern (Vetëm projektet e kërkuara) -->
     <div class="sidebar">
         <div class="logo-area">
-            <h3>Project Manager</h3>
+            <h3>PROJECT GENERATOR</h3>
         </div>
         
         <div class="nav-links">
@@ -405,7 +391,6 @@
                 <span id="projectStatus" class="status-badge status-active">Aktiv</span>
             </h2>
             
-            <!-- Mesazhi për projektet joaktive -->
             <div id="inactiveMessage" style="display: none;">
                 Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.
             </div>
@@ -422,7 +407,6 @@
                     </div>
                 </form>
 
-                <!-- Output Visualization -->
                 <div class="output-container">
                     <div class="output-header">
                         <span>REZULTATI I GJENERUAR</span>
@@ -441,20 +425,14 @@
 
 <script>
     let currentProject = 'abh';
-    // Authentication constants
     const AUTH_KEY = 'formatter_auth_token';
     const VALID_USER = 'admin';
-    const VALID_PASS = 'bukibuki'; // New requested password
+    const VALID_PASS = 'bukibuki';
 
-    // --- AUTHENTICATION LOGIC ---
-
-    // Function to save the token (using Cookie for simplicity)
     function setAuthToken(token) {
-        // Set cookie to expire in 7 days
         document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
     }
 
-    // Function to get the token
     function getAuthToken() {
         const name = AUTH_KEY + "=";
         const decodedCookie = decodeURIComponent(document.cookie);
@@ -471,7 +449,6 @@
         return "";
     }
 
-    // Login handler function
     function handleLogin(event) {
         event.preventDefault();
         const username = document.getElementById('username').value;
@@ -479,67 +456,58 @@
         const errorElement = document.getElementById('loginError');
 
         if (username === VALID_USER && password === VALID_PASS) {
-            // Successful login
             setAuthToken('logged_in_true');
             showDashboard();
         } else {
-            // Failed login
             errorElement.textContent = "Përdoruesi ose fjalëkalimi është i pasaktë.";
             errorElement.style.display = 'block';
         }
     }
 
-    // Function to show the Dashboard and hide the Login Form
     function showDashboard() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
-        // Initialize dashboard state
         initializeDashboard(); 
     }
 
-    // Function to show the Login Form and hide the Dashboard
     function showLogin() {
         document.getElementById('loginScreen').style.display = 'flex';
         document.getElementById('appContainer').style.display = 'none';
     }
 
 
-    // --- PROJECT CONFIGURATION AND MAIN APPLICATION LOGIC ---
-
-    // Project configuration. Only Ipsos and ABH are Active (have 'converter').
     const PROJECTS_CONFIG = {
         'ipsos': {
             fieldsCount: 11,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (11 fusha: VPN_User, VPN_Pass, 2FA_Email, Ingress_User, Ingress_Pass, WebMail_Pass, WebMail_2FA_Pass, SIP_User, SIP_Pass, Shteti, Emri):",
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
-            converter: formatIpsos, // Active
+            converter: formatIpsos,
             fileNamePrefix: '_data',
         },
         'abh': {
             fieldsCount: 5,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
-            converter: formatABH, // Active
+            converter: formatABH,
             fileNamePrefix: '',
         },
         'usuma': {
             fieldsCount: 7,
             helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
             placeholder: "Ky projekt nuk është aktiv.",
-            converter: null, // Inactive
+            converter: null,
             fileNamePrefix: '_usuma_data',
         },
         'leyhausen': {
             fieldsCount: 6,
             helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
             placeholder: "Ky projekt nuk është aktiv.",
-            converter: null, // Inactive
+            converter: null,
             fileNamePrefix: '_leyhausen_user',
         },
     };
 
 
-    // 1. Ipsos data formatting function (11 fields)
     function formatIpsos(fields) {
         if (fields.length !== 11) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 11, u gjetën ${fields.length}.`;
@@ -551,10 +519,8 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
-        // fields[6] is WebMail_2FA_Pass
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
-        // fields[9] is Shteti (Country)
         const name = fields[10];
 
         const output = 
@@ -586,7 +552,6 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
         return output;
     }
 
-    // 2. ABH data formatting function (5 fields)
     function formatABH(fields) {
         if (fields.length !== 5) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 5 fusha, u gjetën ${fields.length}.`;
@@ -613,12 +578,10 @@ ABH Domain: eu.sip.ssl17.net`;
         return output;
     }
     
-    // Conversion handler function
     function handleConvert() {
         const projectConfig = PROJECTS_CONFIG[currentProject];
 
         if (!projectConfig || !projectConfig.converter) {
-            // Project is inactive, do nothing
             return;
         }
 
@@ -629,10 +592,8 @@ ABH Domain: eu.sip.ssl17.net`;
 
         const rawInput = inputElement.value;
         
-        // Split fields by TAB
         let fields = rawInput.split('\t').map(f => f.trim());
         
-        // Remove trailing empty strings if excessive splitting occurred
         if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
             fields.pop();
         }
@@ -645,7 +606,6 @@ ABH Domain: eu.sip.ssl17.net`;
              return;
         }
 
-        // Process conversion
         errorElement.style.display = 'none';
         try {
             const formattedData = projectConfig.converter(fields);
@@ -668,12 +628,10 @@ ABH Domain: eu.sip.ssl17.net`;
         }
     }
 
-    // Function to download the TXT file
     function downloadTxt() {
         const outputContent = document.getElementById('outputContent').innerText;
         const projectConfig = PROJECTS_CONFIG[currentProject] || { fileNamePrefix: 'formatted_data' };
         
-        // Try to extract name for file naming
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
         const defaultName = 'formatted_user';
         let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
@@ -692,7 +650,6 @@ ABH Domain: eu.sip.ssl17.net`;
         URL.revokeObjectURL(url);
     }
 
-    // Sidebar link handler
     function handleProjectSwitch(event) {
         event.preventDefault();
         const targetLink = event.currentTarget;
@@ -706,7 +663,6 @@ ABH Domain: eu.sip.ssl17.net`;
         updateMainContent(projectId);
     }
 
-    // Function to update the main view based on the selected project
     function updateMainContent(projectId) {
         const titleElement = document.getElementById('projectTitle');
         const formatterContainer = document.getElementById('formatterContainer');
@@ -727,7 +683,6 @@ ABH Domain: eu.sip.ssl17.net`;
 
 
         if (projectConfig && projectConfig.converter) {
-            // Project is ACTIVE (Ipsos or ABH)
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
@@ -735,7 +690,6 @@ ABH Domain: eu.sip.ssl17.net`;
             formatterContainer.style.display = 'block';
             inactiveMessage.style.display = 'none';
 
-            // Update input and helper text
             helperText.textContent = projectConfig.helper;
             dataInput.value = projectConfig.placeholder;
             dataInput.placeholder = "Ngjisni rreshtin e të dhënave këtu...";
@@ -743,11 +697,9 @@ ABH Domain: eu.sip.ssl17.net`;
             outputContent.innerText = "Duke pritur për të dhëna...";
             errorElement.style.display = 'none';
             
-            // Convert sample data
             handleConvert();
 
         } else {
-            // Other projects are INACTIVE
             newStatusBadge.textContent = 'Joaktiv';
             newStatusBadge.classList.remove('status-active');
             newStatusBadge.classList.add('status-inactive');
@@ -755,29 +707,24 @@ ABH Domain: eu.sip.ssl17.net`;
             formatterContainer.style.display = 'none';
             inactiveMessage.style.display = 'block';
             
-            // Update helper text and placeholder for inactive projects
             helperText.textContent = inactiveMessage.textContent;
             dataInput.value = '';
             dataInput.placeholder = inactiveMessage.textContent;
-            outputContent.innerText = ""; // Clear output
+            outputContent.innerText = "";
         }
     }
 
 
-    // Dashboard initialization called after successful login
     function initializeDashboard() {
-        // Create event listeners for sidebar clicks
         const links = document.querySelectorAll('.sidebar a');
         links.forEach(link => {
             link.removeEventListener('click', handleProjectSwitch); 
             link.addEventListener('click', handleProjectSwitch); 
         });
 
-        // Set ABH as active on initial load
         updateMainContent('abh');
     }
 
-    // Initial authentication check
     document.addEventListener('DOMContentLoaded', () => {
         if (getAuthToken() === 'logged_in_true') {
             showDashboard();
