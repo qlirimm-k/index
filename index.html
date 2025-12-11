@@ -3,7 +3,7 @@
 <head>
   <title>User Formatter Modern UI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
         --sidebar-bg: #1e293b;
@@ -22,6 +22,90 @@
         height: 100vh; 
         background-color: var(--bg-color); 
         color: var(--text-main);
+    }
+    
+    /* Global Container Setup (to handle login screen) */
+    #appContainer {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.3s ease;
+    }
+
+    /* --- LOGIN SCREEN STYLING --- */
+    #loginScreen {
+        display: none; /* Controlled by JS */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .login-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .login-card h3 {
+        color: var(--accent-color);
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+
+    .login-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .login-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.9rem;
+    }
+
+    .login-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    .login-group input:focus {
+        border-color: var(--accent-color);
+        outline: none;
+    }
+
+    #loginError {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        display: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .login-button {
+        width: 100%;
+        margin-top: 10px;
+        font-size: 1.1rem;
     }
     
     /* --- SIDEBAR STYLING --- */
@@ -276,55 +360,80 @@
 </head>
 <body>
 
-  <!-- Sidebar Modern (Vetëm projektet e kërkuara) -->
-  <div class="sidebar">
-    <div class="logo-area">
-        <h3>Project Manager</h3>
-    </div>
-    
-    <div class="nav-links">
-        <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
-        <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
-        <a href="#" data-project="abh" class="link-abh active">ABH</a> 
-        <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
+  <!-- 1. Faqja e Hyrjes (Login) -->
+  <div id="loginScreen">
+    <div class="login-card">
+        <h3>Hyrja në Panelin e Kontrollit</h3>
+        
+        <div id="loginError"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="login-group">
+                <label for="username">Përdoruesi (Username):</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="login-group">
+                <label for="password">Fjalëkalimi (Password):</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-button">Hyr</button>
+        </form>
     </div>
   </div>
 
-  <div class="content">
-    <div class="card">
-        <h2 id="projectTitle">
-            ABH Formatter
-            <span id="projectStatus" class="status-badge status-active">Aktiv</span>
-        </h2>
-        
-        <!-- Mesazhi për projektet joaktive -->
-        <div id="inactiveMessage" style="display: none;">
-            Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.
+
+  <!-- 2. Kontenieri i Dashboard-it -->
+  <div id="appContainer" style="display: none;">
+    <!-- Sidebar Modern (Vetëm projektet e kërkuara) -->
+    <div class="sidebar">
+        <div class="logo-area">
+            <h3>Project Manager</h3>
         </div>
+        
+        <div class="nav-links">
+            <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
+            <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
+            <a href="#" data-project="abh" class="link-abh active">ABH</a> 
+            <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
+        </div>
+    </div>
 
-        <div id="formatterContainer">
-            <div id="errorMessage" class="error-message"></div>
-
-            <p id="helperText" class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu.</p>
+    <div class="content">
+        <div class="card">
+            <h2 id="projectTitle">
+                ABH Formatter
+                <span id="projectStatus" class="status-badge status-active">Aktiv</span>
+            </h2>
             
-            <form onsubmit="return false;">
-                <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
-                <div class="action-bar">
-                    <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
-                </div>
-            </form>
-
-            <!-- Output Visualization -->
-            <div class="output-container">
-                <div class="output-header">
-                    <span>REZULTATI I GJENERUAR</span>
-                    <span style="font-size: 10px; opacity: 0.7;">FORMATI TXT</span>
-                </div>
-                <div id="outputContent" class="output-content">Duke pritur për të dhëna...</div>
+            <!-- Mesazhi për projektet joaktive -->
+            <div id="inactiveMessage" style="display: none;">
+                Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.
             </div>
 
-            <div style="margin-top: 20px; text-align: right;">
-                <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Shkarko .txt</a>
+            <div id="formatterContainer">
+                <div id="errorMessage" class="error-message"></div>
+
+                <p id="helperText" class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu.</p>
+                
+                <form onsubmit="return false;">
+                    <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
+                    <div class="action-bar">
+                        <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
+                    </div>
+                </form>
+
+                <!-- Output Visualization -->
+                <div class="output-container">
+                    <div class="output-header">
+                        <span>REZULTATI I GJENERUAR</span>
+                        <span style="font-size: 10px; opacity: 0.7;">FORMATI TXT</span>
+                    </div>
+                    <div id="outputContent" class="output-content">Duke pritur për të dhëna...</div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Shkarko .txt</a>
+                </div>
             </div>
         </div>
     </div>
@@ -332,43 +441,105 @@
 
 <script>
     let currentProject = 'abh';
+    // Authentication constants
+    const AUTH_KEY = 'formatter_auth_token';
+    const VALID_USER = 'admin';
+    const VALID_PASS = 'bukibuki'; // New requested password
 
-    // Konfigurimi i projekteve. Vetëm Ipsos dhe ABH janë Aktiv (kanë 'converter').
+    // --- AUTHENTICATION LOGIC ---
+
+    // Function to save the token (using Cookie for simplicity)
+    function setAuthToken(token) {
+        // Set cookie to expire in 7 days
+        document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
+    }
+
+    // Function to get the token
+    function getAuthToken() {
+        const name = AUTH_KEY + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    // Login handler function
+    function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorElement = document.getElementById('loginError');
+
+        if (username === VALID_USER && password === VALID_PASS) {
+            // Successful login
+            setAuthToken('logged_in_true');
+            showDashboard();
+        } else {
+            // Failed login
+            errorElement.textContent = "Përdoruesi ose fjalëkalimi është i pasaktë.";
+            errorElement.style.display = 'block';
+        }
+    }
+
+    // Function to show the Dashboard and hide the Login Form
+    function showDashboard() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        // Initialize dashboard state
+        initializeDashboard(); 
+    }
+
+    // Function to show the Login Form and hide the Dashboard
+    function showLogin() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+    }
+
+
+    // --- PROJECT CONFIGURATION AND MAIN APPLICATION LOGIC ---
+
+    // Project configuration. Only Ipsos and ABH are Active (have 'converter').
     const PROJECTS_CONFIG = {
         'ipsos': {
             fieldsCount: 11,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (11 fusha: VPN_User, VPN_Pass, 2FA_Email, Ingress_User, Ingress_Pass, WebMail_Pass, WebMail_2FA_Pass, SIP_User, SIP_Pass, Shteti, Emri):",
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
-            converter: formatIpsos, // Aktiv
+            converter: formatIpsos, // Active
             fileNamePrefix: '_data',
         },
         'abh': {
             fieldsCount: 5,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
-            converter: formatABH, // Aktiv
+            converter: formatABH, // Active
             fileNamePrefix: '',
         },
         'usuma': {
             fieldsCount: 7,
             helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
             placeholder: "Ky projekt nuk është aktiv.",
-            converter: null, // Joaktiv
+            converter: null, // Inactive
             fileNamePrefix: '_usuma_data',
         },
         'leyhausen': {
             fieldsCount: 6,
             helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
             placeholder: "Ky projekt nuk është aktiv.",
-            converter: null, // Joaktiv
+            converter: null, // Inactive
             fileNamePrefix: '_leyhausen_user',
         },
     };
 
 
-    // --- LOGJIKA E KONVERTIMIT SPECIFIK (vetëm për projektet aktive) ---
-
-    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha)
+    // 1. Ipsos data formatting function (11 fields)
     function formatIpsos(fields) {
         if (fields.length !== 11) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 11, u gjetën ${fields.length}.`;
@@ -380,10 +551,10 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
-        // fields[6] është WebMail_2FA_Pass
+        // fields[6] is WebMail_2FA_Pass
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
-        // fields[9] është Shteti
+        // fields[9] is Shteti (Country)
         const name = fields[10];
 
         const output = 
@@ -415,7 +586,7 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
         return output;
     }
 
-    // 2. Funksioni për formatimin e të dhënave të ABH (5 fusha)
+    // 2. ABH data formatting function (5 fields)
     function formatABH(fields) {
         if (fields.length !== 5) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 5 fusha, u gjetën ${fields.length}.`;
@@ -442,19 +613,12 @@ ABH Domain: eu.sip.ssl17.net`;
         return output;
     }
     
-    // Funksionet e formatimit për projektet Joaktive (thjesht funksione vendosëse)
-    function formatUsuma(fields) { return "ERROR: Ky projekt nuk është aktiv."; }
-    function formatLeyhausen(fields) { return "ERROR: Ky projekt nuk është aktiv."; }
-
-
-    // --- LOGJIKA KRYESORE E APLIKACIONIT ---
-
-    // Funksioni për menaxhimin e konvertimit
+    // Conversion handler function
     function handleConvert() {
         const projectConfig = PROJECTS_CONFIG[currentProject];
 
         if (!projectConfig || !projectConfig.converter) {
-            // Nuk bëjmë asgjë, projekti është joaktiv
+            // Project is inactive, do nothing
             return;
         }
 
@@ -465,10 +629,10 @@ ABH Domain: eu.sip.ssl17.net`;
 
         const rawInput = inputElement.value;
         
-        // Ndarja e fushave me TAB
+        // Split fields by TAB
         let fields = rawInput.split('\t').map(f => f.trim());
         
-        // Eliminon stringjet bosh në fund nëse janë krijuar nga ndarjet e tepërta
+        // Remove trailing empty strings if excessive splitting occurred
         if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
             fields.pop();
         }
@@ -481,7 +645,7 @@ ABH Domain: eu.sip.ssl17.net`;
              return;
         }
 
-        // Procesimi i Konvertimit
+        // Process conversion
         errorElement.style.display = 'none';
         try {
             const formattedData = projectConfig.converter(fields);
@@ -504,11 +668,12 @@ ABH Domain: eu.sip.ssl17.net`;
         }
     }
 
-    // Funksioni për shkarkimin e skedarit TXT
+    // Function to download the TXT file
     function downloadTxt() {
         const outputContent = document.getElementById('outputContent').innerText;
         const projectConfig = PROJECTS_CONFIG[currentProject] || { fileNamePrefix: 'formatted_data' };
         
+        // Try to extract name for file naming
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
         const defaultName = 'formatted_user';
         let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
@@ -527,7 +692,7 @@ ABH Domain: eu.sip.ssl17.net`;
         URL.revokeObjectURL(url);
     }
 
-    // Funksioni për menaxhimin e klikimeve në sidebar
+    // Sidebar link handler
     function handleProjectSwitch(event) {
         event.preventDefault();
         const targetLink = event.currentTarget;
@@ -541,7 +706,7 @@ ABH Domain: eu.sip.ssl17.net`;
         updateMainContent(projectId);
     }
 
-    // Funksioni për të përditësuar pamjen kryesore bazuar në projektin e zgjedhur
+    // Function to update the main view based on the selected project
     function updateMainContent(projectId) {
         const titleElement = document.getElementById('projectTitle');
         const formatterContainer = document.getElementById('formatterContainer');
@@ -558,12 +723,11 @@ ABH Domain: eu.sip.ssl17.net`;
         
         const projectConfig = PROJECTS_CONFIG[projectId];
         
-        // Vendos mesazhin e saktë për projektet Joaktive
         inactiveMessage.textContent = "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
 
 
         if (projectConfig && projectConfig.converter) {
-            // Projekti është AKTIV (Ipsos ose ABH)
+            // Project is ACTIVE (Ipsos or ABH)
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
@@ -571,7 +735,7 @@ ABH Domain: eu.sip.ssl17.net`;
             formatterContainer.style.display = 'block';
             inactiveMessage.style.display = 'none';
 
-            // Përditëson inputin dhe ndihmën
+            // Update input and helper text
             helperText.textContent = projectConfig.helper;
             dataInput.value = projectConfig.placeholder;
             dataInput.placeholder = "Ngjisni rreshtin e të dhënave këtu...";
@@ -579,11 +743,11 @@ ABH Domain: eu.sip.ssl17.net`;
             outputContent.innerText = "Duke pritur për të dhëna...";
             errorElement.style.display = 'none';
             
-            // Konverton të dhënat e shembullit
+            // Convert sample data
             handleConvert();
 
         } else {
-            // Projektet e tjera janë JOAKTIVE
+            // Other projects are INACTIVE
             newStatusBadge.textContent = 'Joaktiv';
             newStatusBadge.classList.remove('status-active');
             newStatusBadge.classList.add('status-inactive');
@@ -591,25 +755,35 @@ ABH Domain: eu.sip.ssl17.net`;
             formatterContainer.style.display = 'none';
             inactiveMessage.style.display = 'block';
             
-            // Përditëson tekstin ndihmës dhe placeholder-in siç kërkohet për projektet joaktive
+            // Update helper text and placeholder for inactive projects
             helperText.textContent = inactiveMessage.textContent;
             dataInput.value = '';
             dataInput.placeholder = inactiveMessage.textContent;
-            outputContent.innerText = ""; // Pastrohet outputi
+            outputContent.innerText = ""; // Clear output
         }
     }
 
 
-    // Vendosja e përmbajtjes fillestare dhe dëgjuesit e ngjarjeve
-    document.addEventListener('DOMContentLoaded', () => {
-        // Krijon dëgjuesit e ngjarjeve për klikimet e sidebar
+    // Dashboard initialization called after successful login
+    function initializeDashboard() {
+        // Create event listeners for sidebar clicks
         const links = document.querySelectorAll('.sidebar a');
         links.forEach(link => {
-            link.addEventListener('click', handleProjectSwitch);
+            link.removeEventListener('click', handleProjectSwitch); 
+            link.addEventListener('click', handleProjectSwitch); 
         });
 
-        // Vendos ABH si aktiv në ngarkimin fillestar
+        // Set ABH as active on initial load
         updateMainContent('abh');
+    }
+
+    // Initial authentication check
+    document.addEventListener('DOMContentLoaded', () => {
+        if (getAuthToken() === 'logged_in_true') {
+            showDashboard();
+        } else {
+            showLogin();
+        }
     });
 
 </script>
