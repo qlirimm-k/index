@@ -208,6 +208,8 @@
         white-space: pre-wrap;
         font-size: 14px;
         line-height: 1.5;
+        min-height: 150px; /* Shtohet lartësia minimale për të shfaqur rezultatin */
+        overflow-x: auto;
     }
 
     .download-btn {
@@ -228,6 +230,17 @@
     .download-btn:hover { background: #059669; }
 
     .helper-text { font-size: 0.9rem; color: #64748b; margin-bottom: 8px; }
+    
+    .error-message {
+        color: #dc2626; /* Red */
+        background: #fee2e2;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        border: 1px solid #fca5a5;
+        font-weight: 500;
+        display: none; /* Fshehur si fillim */
+    }
 
   </style>
 </head>
@@ -240,7 +253,6 @@
     </div>
     
     <div class="nav-links">
-        <!-- U hoq EMA Flash -->
         <!-- IPSOS Active Example -->
         <a href="#" class="link-ipsos active">Ipsos</a>
         <a href="#" class="link-usuma">Usuma</a>
@@ -267,12 +279,14 @@
             <span class="status-badge">Active</span>
         </h2>
         
-        <p class="helper-text">Paste the tab-separated user string below to convert:</p>
+        <div id="errorMessage" class="error-message"></div>
+
+        <p class="helper-text">Paste the tab-separated user string below (e.g., 11 fields including VPN user, VPN pass, 2FA Email, etc.):</p>
         
         <form onsubmit="return false;">
-            <textarea placeholder="extranet\user  password  email@ipsos.com ..."></textarea>
+            <textarea id="dataInput" placeholder="10902.ips.de.intvwr	p?2C4m0u1l	bambus.8@bambusacademy.com	bambus.8.ipsos	ipsos10902	#Ipsos10902TT	deaw3e7457	7457	Cae5reekixeey0uw	Germany	Jan Steen"></textarea>
             <div class="action-bar">
-                <button type="button">Convert Data</button>
+                <button type="button" onclick="handleConvert()">Convert Data</button>
             </div>
         </form>
 
@@ -282,27 +296,154 @@
                 <span>GENERATED OUTPUT</span>
                 <span style="font-size: 10px; opacity: 0.7;">TXT FORMAT</span>
             </div>
-            <div class="output-content">Name:  John Doe
-
-----VPN----
-User: john.doe
-Pass: Secret123
-2FA e-Mail: john@example.com
-
-----Ingress----
-User: ingress_jdoe
-Pass: Pass123
-
-----SIP(Xlite)----
-User Name: 8001
-Password: SipPass
-Soft Phone Domain IP: 172.16.12.8</div>
+            <div id="outputContent" class="output-content">Waiting for data...</div>
         </div>
 
         <div style="margin-top: 20px; text-align: right;">
-            <a href="#" class="download-btn">Download .txt</a>
+            <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Download .txt</a>
         </div>
     </div>
   </div>
+
+<script>
+    // Funksioni kryesor për formatimin e të dhënave të Ipsos
+    function formatIpsos(fields) {
+        // Kontrollon numrin e fushave. Ne presim 11 fusha si në shembullin e fotos tuaj.
+        if (fields.length < 11) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten të paktën 11, u gjetën ${fields.length}.`;
+        }
+
+        // Fusha 0: VPN User (p.sh. 10902.ips.de.intvwr)
+        const vpnUser = fields[0]; 
+        // Fusha 1: VPN Pass (p.sh. p?2C4m0u1l)
+        const vpnPass = fields[1]; 
+        // Fusha 2: 2FA Email (p.sh. bambus.8@bambusacademy.com)
+        const twoFaEmail = fields[2]; 
+        // Fusha 3: Ingress User (p.sh. bambus.8.ipsos)
+        const ingressUser = fields[3]; 
+        // Fusha 4: Ingress Pass (p.sh. ipsos10902)
+        const ingressPass = fields[4]; 
+        // Fusha 5: WebMail Pass (p.sh. #Ipsos10902TT)
+        const webMailPass = fields[5]; 
+        // Fusha 6: Pass WebMail 2FA (p.sh. deaw3e7457)
+        const webMail2FaPass = fields[6]; 
+        // Fusha 7: SIP User (p.sh. 7457)
+        const sipUser = fields[7]; 
+        // Fusha 8: SIP Pass (p.sh. Cae5reekixeey0uw)
+        const sipPass = fields[8]; 
+        // Fusha 9: Shteti (p.sh. Germany) - Nuk përdoret në outputin final, por si fushë e dhënash
+        // const country = fields[9]; 
+        // Fusha 10: Emri i Përdoruesit (p.sh. Jan Steen)
+        const name = fields[10];
+
+        // Formatimi i stringut të dëshiruar (duke ndjekur shembullin e fotos 2)
+        const output = 
+`Name: ${name}
+
+----VPN----
+User: ${vpnUser}
+Pass: ${vpnPass}
+2FA e-Mail: ${twoFaEmail}
+
+----Ingress----
+User: ${ingressUser}
+Pass: ${ingressPass}
+
+----SIP(Xlite)----
+User Name: ${sipUser}
+Password: ${sipPass}
+Soft Phone Domain IP: 172.16.12.8
+
+----WebMail----
+2FA e-Mail: ${twoFaEmail}
+Password: ${webMailPass}@
+WebMail login page: https://sxb1plzcpnl489552.prod.sxb1.secureserver.net:2096/
+
+----Ingress Interview login page----
+EMA Server Link: https://d534ema.keyingress.de/
+EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
+
+        return output;
+    }
+
+    // Funksioni për menaxhimin e konvertimit
+    function handleConvert() {
+        const inputElement = document.getElementById('dataInput');
+        const outputElement = document.getElementById('outputContent');
+        const errorElement = document.getElementById('errorMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Përdor ' ' (hapësirë) si ndarës, pasi në foton tuaj duket se përdoret hapësira ose TAB.
+        // Për të qenë sa më i saktë, po i zëvendësoj të gjitha hapësirat me TAB përpara se të ndaj stringun.
+        // Nqs keni përdorur TAB (sepse e keni quajtur "tab-separated"), atëherë vetëm .split('\t') do të mjaftonte.
+        
+        // Për siguri, zëvendësojmë grupime të hapësirave ose TAB-eve me një TAB të vetëm dhe ndajmë me TAB.
+        const rawInput = inputElement.value.trim();
+        const normalizedInput = rawInput.replace(/[\t\s]+/g, '\t'); // Normalizon hapësirat e shumta/TAB në një TAB
+        const fields = normalizedInput.split('\t').map(f => f.trim());
+        
+        // Fsheh mesazhin e gabimit dhe butonin e shkarkimit
+        errorElement.style.display = 'none';
+        downloadBtn.style.display = 'none';
+
+        if (fields.length < 11) {
+            errorElement.innerHTML = `Gabim: Duhet të ngjisni të paktën 11 fusha të ndara me TAB (ose hapësirë). Ju keni ngjitur ${fields.length}.`;
+            errorElement.style.display = 'block';
+            outputElement.innerText = "Error during conversion. Please check input format.";
+            return;
+        }
+
+        try {
+            const formattedData = formatIpsos(fields);
+            
+            if (formattedData.startsWith("ERROR")) {
+                errorElement.innerHTML = formattedData.replace("ERROR: ", "");
+                errorElement.style.display = 'block';
+                outputElement.innerText = "Error during conversion. Please check input format.";
+            } else {
+                outputElement.innerText = formattedData;
+                downloadBtn.style.display = 'inline-flex';
+            }
+
+        } catch (e) {
+            errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
+            errorElement.style.display = 'block';
+            outputElement.innerText = "Internal error.";
+        }
+    }
+
+    // Funksioni për shkarkimin e skedarit TXT
+    function downloadTxt() {
+        const outputContent = document.getElementById('outputContent').innerText;
+        const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
+        const defaultName = 'formatted_user_data';
+        const fileName = (nameMatch && nameMatch[1].trim()) ? `${nameMatch[1].trim().replace(/\s/g, '_')}_data.txt` : `${defaultName}.txt`;
+        
+        // Krijimi i Blob dhe linku i shkarkimit
+        const blob = new Blob([outputContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); // Pastron URL-në e krijuar
+    }
+
+    // Vendosja e përmbajtjes fillestare
+    document.addEventListener('DOMContentLoaded', () => {
+        // Simulo konvertimin me shembullin e dhënë në foton tuaj, për të shfaqur outputin kur ngarkohet faqja.
+        const exampleInput = "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen";
+        document.getElementById('dataInput').value = exampleInput;
+        // Për shkak se nuk mund të thërrasim handleConvert drejtpërdrejt, po vendosim një shembull statik outputi fillimisht.
+        // Përdoruesi do ta shtypë butonin "Convert Data" për të parë rezultatin real.
+        // OSE thirret handleConvert kur ngarkohet DOM:
+        handleConvert();
+    });
+
+</script>
+
 </body>
 </html>
