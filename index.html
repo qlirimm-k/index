@@ -31,6 +31,7 @@
         transition: opacity 0.3s ease;
     }
 
+    /* --- Login Screen Styles --- */
     #loginScreen {
         display: none;
         position: fixed;
@@ -106,6 +107,7 @@
         font-size: 1.1rem;
     }
     
+    /* --- Sidebar Styles --- */
     .sidebar {
       width: 280px; 
       background: var(--sidebar-bg); 
@@ -180,6 +182,7 @@
     }
     .sidebar a.active::before { opacity: 1; background-color: #fff; }
 
+    /* --- Content and Card Styles --- */
     .content { 
         flex: 1; 
         padding: 40px; 
@@ -241,6 +244,16 @@
         display: none;
     }
 
+    /* --- Form and Output Styles --- */
+    .input-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .input-area {
+        flex-grow: 1;
+    }
 
     textarea { 
         width: 100%; 
@@ -285,6 +298,21 @@
     }
     button:hover { background: var(--accent-hover); transform: translateY(-1px); }
     button:active { transform: translateY(0); }
+    
+    .hint-button {
+        background: #f97316; /* Orange color for distinction */
+        box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+        flex-shrink: 0;
+        height: 120px; /* Match textarea height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        padding: 10px;
+        width: 100px;
+    }
+    .hint-button:hover { background: #ea580c; }
+
 
     .output-container {
         margin-top: 30px;
@@ -345,10 +373,125 @@
         display: none;
     }
 
+    /* --- Modal/Hint Styles --- */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; 
+        z-index: 2000; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0,0,0,0.6); 
+        padding-top: 50px;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto; /* 5% from the top and centered */
+        padding: 30px;
+        border-radius: 12px;
+        width: 90%; 
+        max-width: 600px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h4 {
+        color: var(--accent-color);
+        margin-top: 0;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+    }
+
+    .modal-content ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .modal-content ul li {
+        margin-bottom: 15px;
+        padding-left: 20px;
+        position: relative;
+        line-height: 1.6;
+        color: var(--text-main);
+        font-size: 15px;
+    }
+    
+    .modal-content ul li::before {
+        content: '•'; 
+        color: #10b981; 
+        font-weight: bold; 
+        display: inline-block; 
+        width: 1em;
+        margin-left: -1em;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: var(--accent-color);
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            max-height: 150px;
+            overflow-x: auto;
+            flex-direction: row;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .logo-area { display: none; }
+        .nav-links { flex-direction: row; }
+        .content { padding: 20px; }
+        .sidebar a { padding: 8px 10px; margin-right: 5px; }
+        
+        .input-row {
+            flex-direction: column;
+        }
+        .hint-button {
+            height: 40px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .modal-content {
+            margin: 10% auto;
+            width: 95%;
+        }
+    }
+
   </style>
 </head>
 <body>
 
+  <!-- Modal/Hint Pop-up -->
+  <div id="hintModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <h4>Udhëzime: Si të bëhet Setup projekti IPSOS</h4>
+      <p style="font-style: italic; color: #64748b;">Këta janë hapat thelbësorë për konfigurimin e llogarisë së re të agjentit.</p>
+      <ul>
+        <li>Instaloni (ose sigurohuni që është i instaluar) setup-i **Cisco VPN** në kompjuterin e agjentit.</li>
+        <li>Përdorni të dhënat e gjeneruara nga kjo vegël për **VPN User** dhe **VPN Pass** për t'u kyçur.</li>
+        <li>Instaloni **Xlite** (ose soft phone tjetër sipas kërkesës) dhe bëni setup llogarinë SIP duke përdorur **SIP User** dhe **SIP Pass**.</li>
+        <li>Vendosni linkun e **WebMail** në Chrome dhe përdoreni atë (duke u kyçur) për të vendosur **2FA** për konfigurimin e Cisco VPN.</li>
+      </ul>
+      <p style="font-size: 0.85rem; color: #94a3b8;">*Të dhënat specifike (User/Pass) merren nga seksioni 'REZULTATI I GJENERUAR'.</p>
+    </div>
+  </div>
+  
   <div id="loginScreen">
     <div class="login-card">
         <h3>PROJECT GENERATOR</h3>
@@ -401,7 +544,15 @@
                 <p id="helperText" class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu.</p>
                 
                 <form onsubmit="return false;">
-                    <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
+                    <div class="input-row">
+                        <div class="input-area">
+                            <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
+                        </div>
+                        <!-- Hint button added here -->
+                        <button type="button" id="hintBtn" class="hint-button" style="display: none;" onclick="openModal()">
+                            Udhëzime Setup
+                        </button>
+                    </div>
                     <div class="action-bar">
                         <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
                     </div>
@@ -430,6 +581,7 @@
     const VALID_PASS = 'bukibuki';
 
     function setAuthToken(token) {
+        // Set the cookie for 7 days
         document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
     }
 
@@ -483,6 +635,7 @@
             placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
             converter: formatIpsos,
             fileNamePrefix: '_data',
+            showHint: true
         },
         'abh': {
             fieldsCount: 5,
@@ -490,6 +643,7 @@
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
             converter: formatABH,
             fileNamePrefix: '',
+            showHint: false
         },
         'usuma': {
             fieldsCount: 7,
@@ -497,6 +651,7 @@
             placeholder: "Ky projekt nuk është aktiv.",
             converter: null,
             fileNamePrefix: '_usuma_data',
+            showHint: false
         },
         'leyhausen': {
             fieldsCount: 6,
@@ -504,6 +659,7 @@
             placeholder: "Ky projekt nuk është aktiv.",
             converter: null,
             fileNamePrefix: '_leyhausen_user',
+            showHint: false
         },
     };
 
@@ -519,8 +675,10 @@
         const ingressUser = fields[3]; 
         const ingressPass = fields[4]; 
         const webMailPass = fields[5]; 
+        // fields[6] is WebMail_2FA_Pass, which is ignored in output
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
+        // fields[9] is Shteti (Country), which is ignored in output
         const name = fields[10];
 
         const output = 
@@ -594,6 +752,7 @@ ABH Domain: eu.sip.ssl17.net`;
         
         let fields = rawInput.split('\t').map(f => f.trim());
         
+        // Handle trailing tab that results in an empty string at the end of the array
         if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
             fields.pop();
         }
@@ -611,6 +770,7 @@ ABH Domain: eu.sip.ssl17.net`;
             const formattedData = projectConfig.converter(fields);
             
             if (formattedData.startsWith("ERROR")) {
+                // If converter returns a formatted error string
                 errorElement.innerHTML = formattedData.replace("ERROR: ", "");
                 errorElement.style.display = 'block';
                 outputElement.innerText = "Error during conversion. Please check input format.";
@@ -621,6 +781,7 @@ ABH Domain: eu.sip.ssl17.net`;
             }
 
         } catch (e) {
+            // Catch unexpected runtime errors
             errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
             errorElement.style.display = 'block';
             outputContent.innerText = "Internal error.";
@@ -632,12 +793,14 @@ ABH Domain: eu.sip.ssl17.net`;
         const outputContent = document.getElementById('outputContent').innerText;
         const projectConfig = PROJECTS_CONFIG[currentProject] || { fileNamePrefix: 'formatted_data' };
         
+        // Try to extract the user's name for a better file name
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
         const defaultName = 'formatted_user';
         let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
 
         const fileName = `${baseName}${projectConfig.fileNamePrefix}.txt`;
         
+        // Create a downloadable blob
         const blob = new Blob([outputContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         
@@ -655,6 +818,7 @@ ABH Domain: eu.sip.ssl17.net`;
         const targetLink = event.currentTarget;
         const projectId = targetLink.getAttribute('data-project');
         
+        // Update active class for sidebar links
         const links = document.querySelectorAll('.sidebar a');
         links.forEach(link => link.classList.remove('active'));
         targetLink.classList.add('active');
@@ -671,9 +835,11 @@ ABH Domain: eu.sip.ssl17.net`;
         const helperText = document.getElementById('helperText');
         const outputContent = document.getElementById('outputContent');
         const errorElement = document.getElementById('errorMessage');
+        const hintBtn = document.getElementById('hintBtn');
 
         const projectName = document.querySelector(`.sidebar a[data-project="${projectId}"]`).textContent;
 
+        // Update main title and status badge structure
         titleElement.innerHTML = `${projectName} Formatter <span id="projectStatus" class="status-badge"></span>`;
         const newStatusBadge = document.getElementById('projectStatus');
         
@@ -683,6 +849,7 @@ ABH Domain: eu.sip.ssl17.net`;
 
 
         if (projectConfig && projectConfig.converter) {
+            // Project is active
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
@@ -697,9 +864,14 @@ ABH Domain: eu.sip.ssl17.net`;
             outputContent.innerText = "Duke pritur për të dhëna...";
             errorElement.style.display = 'none';
             
+            // Show/Hide Hint Button based on project config
+            hintBtn.style.display = projectConfig.showHint ? 'flex' : 'none';
+
+            // Run conversion immediately to show the formatted placeholder data
             handleConvert();
 
         } else {
+            // Project is inactive
             newStatusBadge.textContent = 'Joaktiv';
             newStatusBadge.classList.remove('status-active');
             newStatusBadge.classList.add('status-inactive');
@@ -711,6 +883,25 @@ ABH Domain: eu.sip.ssl17.net`;
             dataInput.value = '';
             dataInput.placeholder = inactiveMessage.textContent;
             outputContent.innerText = "";
+            
+            hintBtn.style.display = 'none'; // Hide hint for inactive projects
+        }
+    }
+
+    // Modal functions
+    function openModal() {
+        document.getElementById('hintModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('hintModal').style.display = 'none';
+    }
+
+    // Close modal if user clicks outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('hintModal');
+        if (event.target === modal) {
+            closeModal();
         }
     }
 
@@ -722,6 +913,7 @@ ABH Domain: eu.sip.ssl17.net`;
             link.addEventListener('click', handleProjectSwitch); 
         });
 
+        // Set initial project to 'abh' and update content
         updateMainContent('abh');
     }
 
