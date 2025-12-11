@@ -281,9 +281,9 @@
     
     <div class="nav-links">
         <!-- IPSOS Active Example -->
-        <a href="#" data-project="ipsos" class="link-ipsos active">Ipsos</a>
+        <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
         <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
-        <a href="#" data-project="abh" class="link-abh">ABH</a>
+        <a href="#" data-project="abh" class="link-abh active">ABH</a> <!-- ABH aktiv tani -->
         <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
         <a href="#" data-project="imug" class="link-imug">Imug</a>
         <a href="#" data-project="imfield" class="link-imfield">ImField</a>
@@ -302,22 +302,22 @@
   <div class="content">
     <div class="card">
         <h2 id="projectTitle">
-            IPSOS Formatter
+            ABH Formatter
             <span id="projectStatus" class="status-badge status-active">Aktiv</span>
         </h2>
         
         <!-- Mesazhi për projektet joaktive -->
-        <div id="inactiveMessage">
+        <div id="inactiveMessage" style="display: none;">
             Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.
         </div>
 
         <div id="formatterContainer">
             <div id="errorMessage" class="error-message"></div>
 
-            <p class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu (p.sh., 11 fusha):</p>
+            <p id="helperText" class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu.</p>
             
             <form onsubmit="return false;">
-                <textarea id="dataInput" placeholder="10902.ips.de.intvwr	p?2C4m0u1l	bambus.8@bambusacademy.com	bambus.8.ipsos	ipsos10902	#Ipsos10902TT	deaw3e7457	7457	Cae5reekixeey0uw	Germany	Jan Steen"></textarea>
+                <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
                 <div class="action-bar">
                     <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
                 </div>
@@ -340,17 +340,34 @@
   </div>
 
 <script>
-    // Mbajtësi i statusit të projektit aktual
-    let currentProject = 'ipsos';
+    // Mbajtësi i statusit të projektit aktual. Fillojmë me ABH siç u kërkua.
+    let currentProject = 'abh';
+    const ACTIVE_PROJECTS = {
+        'ipsos': {
+            fieldsCount: 11,
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (p.sh., 11 fusha: VPN_User, VPN_Pass, 2FA_Email, etj.):",
+            placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
+            converter: formatIpsos,
+            fileNamePrefix: '_data',
+        },
+        'abh': {
+            fieldsCount: 5,
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
+            placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
+            converter: formatABH,
+            fileNamePrefix: '',
+        }
+        // Projektet e tjera do të përdorin mesazhin joaktiv
+    };
 
-    // Funksioni kryesor për formatimin e të dhënave të Ipsos
+    // --- LOGJIKA E KONVERTIMIT SPECIFIK ---
+
+    // 1. Funksioni për formatimin e të dhënave të Ipsos (11 fusha)
     function formatIpsos(fields) {
-        // Kontrollon numrin e fushave. Ne presim 11 fusha.
         if (fields.length < 11) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten të paktën 11, u gjetën ${fields.length}.`;
         }
 
-        // Fusha 0 deri 9 merren si më parë
         const vpnUser = fields[0]; 
         const vpnPass = fields[1]; 
         const twoFaEmail = fields[2]; 
@@ -360,12 +377,9 @@
         const webMail2FaPass = fields[6]; 
         const sipUser = fields[7]; 
         const sipPass = fields[8]; 
-        // fields[9] është Shteti (Germany) - nuk përdoret direkt në output
-        
-        // Fusha 10: Emri i Përdoruesit (Jan Steen). Kjo tashmë duhet të jetë fusha e plotë falë ndryshimeve në handleConvert.
+        // fields[9] është Shteti (Germany)
         const name = fields[10];
 
-        // Formatimi i stringut të dëshiruar (duke ndjekur shembullin e fotos 2)
         const output = 
 `Name: ${name}
 
@@ -395,10 +409,43 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
         return output;
     }
 
+    // 2. Funksioni për formatimin e të dhënave të ABH (5 fusha)
+    function formatABH(fields) {
+        // Shqyrto numrin e fushave
+        if (fields.length !== 5) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 5 fusha, u gjetën ${fields.length}.`;
+        }
+
+        const name = fields[0]; // Emine Ibishi
+        const abhUser = fields[1]; // Agent_Bambus16
+        const abhPass = fields[2]; // Bambus16
+        const iaxExt = fields[3]; // 935912
+        const iaxPass = fields[4]; // E4}s4%L1|
+
+        // Outputi sipas formatit të kërkuar (ABH Emine Ibishi.txt - Notepad)
+        const output = 
+`Name:  ${name}
+
+--------------------------------------
+ABH Login Details
+Username:  ${abhUser}
+Password:  ${abhPass}
+--------------------------------------
+IAX Extension:  ${iaxExt}
+Password:  ${iaxPass}
+ABH Domain: eu.sip.ssl17.net`;
+        
+        return output;
+    }
+
+    // --- LOGJIKA KRYESORE E APLIKACIONIT ---
+
     // Funksioni për menaxhimin e konvertimit
     function handleConvert() {
-        if (currentProject !== 'ipsos') {
-            // Nëse nuk është projekti aktiv (Ipsos), injoroje klikimin
+        const projectConfig = ACTIVE_PROJECTS[currentProject];
+
+        if (!projectConfig) {
+            // Sigurohuni që mos të bëhet konvertimi nëse projekti nuk është aktiv
             return;
         }
 
@@ -409,66 +456,77 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
 
         const rawInput = inputElement.value.trim();
         
-        const fields = rawInput.split('\t');
+        // Përpiqemi të ndajmë të dhënat me TAB
+        let fields = rawInput.split('\t');
+        let isValidSplit = true;
 
-        // Pasi ndahen, ne duhet të trajtojmë rastin kur ndarja është bërë me hapësira (si në shembullin fillestar të inputit)
-        if (fields.length < 11) {
-            // Tentojmë ndarjen me hapësira të shumta (ose si në foto)
-            // Kërkojmë për 10 ndarës duke përdorur RegEx, dhe pjesa e mbetur është fusha 11
-            // Ky RegEx supozon se fushat ndahen me 1 ose më shumë hapësira
-            const fieldsFromSpace = rawInput.match(/^([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+(.*)$/);
+        // Përpiqemi të rregullojmë nëse inputi përdor hapësira në vend të TAB-ave për ndarje
+        if (fields.length < projectConfig.fieldsCount) {
+            // Për ABH (5 fusha) dhe IPSOS (11 fusha)
+            // Kërkojmë për 4 (ABH) ose 10 (IPSOS) ndarës me hapsirë/tab, dhe pjesa e mbetur është fusha e fundit
+            // Kjo është një qasje e përgjithshme, por ndarja me TAB është e preferuar
+            const regexPattern = `^([^\t\\s]+[\\t\\s]+){${projectConfig.fieldsCount - 1}}([^\t\\s]+)$`;
+            const spaceSplitRegex = new RegExp(regexPattern);
+            const fieldsFromSpaceMatch = rawInput.match(spaceSplitRegex);
 
-            if (fieldsFromSpace && fieldsFromSpace.length === 12) {
-                // Fusha e parë (index 0) është stringu i plotë, ne duam vetëm ato pasardhëse (1 deri 11)
-                const formattedFields = fieldsFromSpace.slice(1, 12).map(f => f.trim());
-                if (formattedFields.length === 11) {
-                    processConversion(formattedFields);
-                    return;
-                }
+            if (fieldsFromSpaceMatch && fieldsFromSpaceMatch.length === projectConfig.fieldsCount + 1) {
+                 // Nxjerrim vetëm grupet e kapura (fushën e 1-rë deri të fushën e fundit)
+                 fields = fieldsFromSpaceMatch.slice(1, projectConfig.fieldsCount + 1).map(f => f.trim());
+                 isValidSplit = true;
+            } else if (fields.length === projectConfig.fieldsCount) {
+                // Rasti kur ndarja me TAB ishte ok, por fillimisht fields.length < fieldsCount doli false gabimisht (sigurim)
+                isValidSplit = true;
             } else {
-                 errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht 11 fusha të ndara me TAB (ose hapësirë). U gjetën ${fields.length} (ose gabim në formatin e hapësirave).`;
-                 errorElement.style.display = 'block';
-                 outputElement.innerText = "Error during conversion. Please check input format.";
-                 downloadBtn.style.display = 'none';
-                 return;
+                isValidSplit = false;
             }
-        } else {
-            // Përdorim ndarjen me TAB nqs numri i fushave është ok
-            const finalFields = fields.map(f => f.trim());
-            processConversion(finalFields);
-            return;
+        }
+        
+        // Finalizimi i fushave
+        const finalFields = fields.map(f => f.trim());
+
+        if (finalFields.length !== projectConfig.fieldsCount) {
+             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB (ose hapësirë). U gjetën ${finalFields.length}.`;
+             errorElement.style.display = 'block';
+             outputElement.innerText = "Error during conversion. Please check input format.";
+             downloadBtn.style.display = 'none';
+             return;
         }
 
-        function processConversion(fieldsArray) {
-            errorElement.style.display = 'none';
-            try {
-                const formattedData = formatIpsos(fieldsArray);
-                
-                if (formattedData.startsWith("ERROR")) {
-                    errorElement.innerHTML = formattedData.replace("ERROR: ", "");
-                    errorElement.style.display = 'block';
-                    outputElement.innerText = "Error during conversion. Please check input format.";
-                    downloadBtn.style.display = 'none';
-                } else {
-                    outputElement.innerText = formattedData;
-                    downloadBtn.style.display = 'inline-flex';
-                }
-
-            } catch (e) {
-                errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
+        // Procesimi i Konvertimit
+        errorElement.style.display = 'none';
+        try {
+            const formattedData = projectConfig.converter(finalFields);
+            
+            if (formattedData.startsWith("ERROR")) {
+                errorElement.innerHTML = formattedData.replace("ERROR: ", "");
                 errorElement.style.display = 'block';
-                outputElement.innerText = "Internal error.";
+                outputElement.innerText = "Error during conversion. Please check input format.";
                 downloadBtn.style.display = 'none';
+            } else {
+                outputElement.innerText = formattedData;
+                downloadBtn.style.display = 'inline-flex';
             }
+
+        } catch (e) {
+            errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
+            errorElement.style.display = 'block';
+            outputElement.innerText = "Internal error.";
+            downloadBtn.style.display = 'none';
         }
     }
 
     // Funksioni për shkarkimin e skedarit TXT
     function downloadTxt() {
         const outputContent = document.getElementById('outputContent').innerText;
+        const projectConfig = ACTIVE_PROJECTS[currentProject] || { fileNamePrefix: '_data' };
+        
+        // Përpiqet të gjejë emrin nga rreshti 'Name:'
         const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
-        const defaultName = 'formatted_user_data';
-        const fileName = (nameMatch && nameMatch[1].trim()) ? `${nameMatch[1].trim().replace(/\s/g, '_')}_data.txt` : `${defaultName}.txt`;
+        const defaultName = 'formatted_user';
+        let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s/g, '_') : defaultName;
+
+        // Shton prefiksin e skedarit (p.sh. '_data' për Ipsos, ose asgjë për ABH)
+        const fileName = `${baseName}${projectConfig.fileNamePrefix}.txt`;
         
         // Krijimi i Blob dhe linku i shkarkimit
         const blob = new Blob([outputContent], { type: 'text/plain' });
@@ -503,22 +561,35 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
         const statusBadge = document.getElementById('projectStatus');
         const formatterContainer = document.getElementById('formatterContainer');
         const inactiveMessage = document.getElementById('inactiveMessage');
-        
-        // Merr emrin e projektit nga teksti i linkut
+        const dataInput = document.getElementById('dataInput');
+        const helperText = document.getElementById('helperText');
+        const outputContent = document.getElementById('outputContent');
+        const errorElement = document.getElementById('errorMessage');
+
         const projectName = document.querySelector(`.sidebar a[data-project="${projectId}"]`).textContent;
 
         titleElement.innerHTML = `${projectName} Formatter <span id="projectStatus" class="status-badge"></span>`;
         const newStatusBadge = document.getElementById('projectStatus');
+        
+        const projectConfig = ACTIVE_PROJECTS[projectId];
 
-        if (projectId === 'ipsos') {
-            // Projekti IPSOS është AKTIV
+        if (projectConfig) {
+            // Projekti është AKTIV
             newStatusBadge.textContent = 'Aktiv';
             newStatusBadge.classList.remove('status-inactive');
             newStatusBadge.classList.add('status-active');
             
             formatterContainer.style.display = 'block';
             inactiveMessage.style.display = 'none';
-            // Përpiqu të ngarkosh shembullin dhe të konvertosh
+
+            // Përditëson inputin dhe ndihmën
+            helperText.textContent = projectConfig.helper;
+            dataInput.placeholder = projectConfig.placeholder;
+            dataInput.value = projectConfig.placeholder;
+            outputContent.innerText = "Duke pritur për të dhëna...";
+            errorElement.style.display = 'none';
+            
+            // Konverton të dhënat e shembullit
             handleConvert();
 
         } else {
@@ -535,18 +606,14 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
 
     // Vendosja e përmbajtjes fillestare dhe dëgjuesit e ngjarjeve
     document.addEventListener('DOMContentLoaded', () => {
-        // Shembulli i inputit fillestar
-        const exampleInput = "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen";
-        document.getElementById('dataInput').value = exampleInput;
-        
         // Krijon dëgjuesit e ngjarjeve për klikimet e sidebar
         const links = document.querySelectorAll('.sidebar a');
         links.forEach(link => {
             link.addEventListener('click', handleProjectSwitch);
         });
 
-        // Shfaq outputin fillestar për IPSOS
-        handleConvert();
+        // Kujdes: Thërret logjikën e përditësimit me projektin fillestar 'abh'
+        updateMainContent('abh');
     });
 
 </script>
