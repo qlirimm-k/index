@@ -163,8 +163,6 @@
         font-size: 1.2rem;
         font-weight: 600;
         margin-top: 25px;
-        /* Teksti i saktë i kërkuar */
-        content: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
         display: none; /* Fshehur fillimisht */
     }
 
@@ -278,7 +276,7 @@
 </head>
 <body>
 
-  <!-- Sidebar Modern -->
+  <!-- Sidebar Modern (Vetëm projektet e kërkuara) -->
   <div class="sidebar">
     <div class="logo-area">
         <h3>Project Manager</h3>
@@ -289,17 +287,6 @@
         <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
         <a href="#" data-project="abh" class="link-abh active">ABH</a> 
         <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
-        <a href="#" data-project="imug" class="link-imug">Imug</a>
-        <a href="#" data-project="imfield" class="link-imfield">ImField</a>
-        <a href="#" data-project="kraemer" class="link-kraemer">Krämer</a>
-        <a href="#" data-project="ingress" class="link-ingress">Ingress</a>
-        <a href="#" data-project="immler" class="link-immler">Immler</a>
-        <a href="#" data-project="salesupplay" class="link-salesupplay">Salesupplay</a>
-        <a href="#" data-project="kantar-de" class="link-kantar-de">Kantar DE</a>
-        <a href="#" data-project="tns" class="link-tns">TNS User</a>
-        <a href="#" data-project="kantar-forsta" class="link-kantar-forsta">Kantar AU + Forsta</a>
-        <a href="#" data-project="kantar-au" class="link-kantar-au">Kantar AU</a>
-        <a href="#" data-project="otto" class="link-otto">OTTO</a>
     </div>
   </div>
 
@@ -346,7 +333,7 @@
 <script>
     let currentProject = 'abh';
 
-    // Konfigurimi i të gjitha projekteve. Vetëm ato me 'converter' janë aktive.
+    // Konfigurimi i projekteve. Vetëm Ipsos dhe ABH janë Aktiv (kanë 'converter').
     const PROJECTS_CONFIG = {
         'ipsos': {
             fieldsCount: 11,
@@ -359,35 +346,23 @@
             fieldsCount: 5,
             helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
             placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
-            converter: formatABH, // Aktiv (Për t'u rregulluar më vonë sipas kërkesës tuaj)
+            converter: formatABH, // Aktiv
             fileNamePrefix: '',
         },
         'usuma': {
             fieldsCount: 7,
-            helper: "Projekti joaktiv. Zgjidhni Ipsos ose ABH.",
-            placeholder: "Lori Hysa\tlhysa\tP@ssword!1\tlhysa@usuma.net\tW@bPass!1\t2001\tSipPass-2024",
+            helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
+            placeholder: "Ky projekt nuk është aktiv.",
             converter: null, // Joaktiv
             fileNamePrefix: '_usuma_data',
         },
         'leyhausen': {
             fieldsCount: 6,
-            helper: "Projekti joaktiv. Zgjidhni Ipsos ose ABH.",
-            placeholder: "Ardit Gashi\tagashi\tAgashi!2024\t105\tExtPass!24\tvoip.leyhausen.de",
+            helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
+            placeholder: "Ky projekt nuk është aktiv.",
             converter: null, // Joaktiv
             fileNamePrefix: '_leyhausen_user',
         },
-        // Të gjitha projektet e tjera janë Joaktive
-        'imug': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'imfield': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'kraemer': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'ingress': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'immler': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'salesupplay': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'kantar-de': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'tns': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'kantar-forsta': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'kantar-au': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
-        'otto': { converter: null, helper: "Projekti joaktiv.", placeholder: "", fieldsCount: 0 },
     };
 
 
@@ -467,10 +442,9 @@ ABH Domain: eu.sip.ssl17.net`;
         return output;
     }
     
-    // Funksionet e formatimit për projektet Joaktive
-    // Këto nuk thirren në praktikë, pasi 'converter' është null në PROJECTS_CONFIG.
-    function formatUsuma(fields) { return "ERROR: Usuma is not active."; }
-    function formatLeyhausen(fields) { return "ERROR: Leyhausen is not active."; }
+    // Funksionet e formatimit për projektet Joaktive (thjesht funksione vendosëse)
+    function formatUsuma(fields) { return "ERROR: Ky projekt nuk është aktiv."; }
+    function formatLeyhausen(fields) { return "ERROR: Ky projekt nuk është aktiv."; }
 
 
     // --- LOGJIKA KRYESORE E APLIKACIONIT ---
@@ -584,7 +558,7 @@ ABH Domain: eu.sip.ssl17.net`;
         
         const projectConfig = PROJECTS_CONFIG[projectId];
         
-        // Mbajmë rendin e saktë të mesazhit siç kërkohet
+        // Vendos mesazhin e saktë për projektet Joaktive
         inactiveMessage.textContent = "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
 
 
@@ -617,8 +591,10 @@ ABH Domain: eu.sip.ssl17.net`;
             formatterContainer.style.display = 'none';
             inactiveMessage.style.display = 'block';
             
-            // Fsheh inputin dhe outputin nëse është joaktiv
+            // Përditëson tekstin ndihmës dhe placeholder-in siç kërkohet për projektet joaktive
+            helperText.textContent = inactiveMessage.textContent;
             dataInput.value = '';
+            dataInput.placeholder = inactiveMessage.textContent;
             outputContent.innerText = ""; // Pastrohet outputi
         }
     }
