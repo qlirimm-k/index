@@ -281,26 +281,26 @@
         
         <div id="errorMessage" class="error-message"></div>
 
-        <p class="helper-text">Paste the tab-separated user string below (e.g., 11 fields including VPN user, VPN pass, 2FA Email, etc.):</p>
+        <p class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu (p.sh., 11 fusha):</p>
         
         <form onsubmit="return false;">
             <textarea id="dataInput" placeholder="10902.ips.de.intvwr	p?2C4m0u1l	bambus.8@bambusacademy.com	bambus.8.ipsos	ipsos10902	#Ipsos10902TT	deaw3e7457	7457	Cae5reekixeey0uw	Germany	Jan Steen"></textarea>
             <div class="action-bar">
-                <button type="button" onclick="handleConvert()">Convert Data</button>
+                <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
             </div>
         </form>
 
         <!-- Output Visualization -->
         <div class="output-container">
             <div class="output-header">
-                <span>GENERATED OUTPUT</span>
-                <span style="font-size: 10px; opacity: 0.7;">TXT FORMAT</span>
+                <span>REZULTATI I GJENERUAR</span>
+                <span style="font-size: 10px; opacity: 0.7;">FORMATI TXT</span>
             </div>
-            <div id="outputContent" class="output-content">Waiting for data...</div>
+            <div id="outputContent" class="output-content">Duke pritur për të dhëna...</div>
         </div>
 
         <div style="margin-top: 20px; text-align: right;">
-            <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Download .txt</a>
+            <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Shkarko .txt</a>
         </div>
     </div>
   </div>
@@ -308,32 +308,24 @@
 <script>
     // Funksioni kryesor për formatimin e të dhënave të Ipsos
     function formatIpsos(fields) {
-        // Kontrollon numrin e fushave. Ne presim 11 fusha si në shembullin e fotos tuaj.
+        // Kontrollon numrin e fushave. Ne presim 11 fusha.
         if (fields.length < 11) {
             return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten të paktën 11, u gjetën ${fields.length}.`;
         }
 
-        // Fusha 0: VPN User (p.sh. 10902.ips.de.intvwr)
+        // Fusha 0 deri 9 merren si më parë
         const vpnUser = fields[0]; 
-        // Fusha 1: VPN Pass (p.sh. p?2C4m0u1l)
         const vpnPass = fields[1]; 
-        // Fusha 2: 2FA Email (p.sh. bambus.8@bambusacademy.com)
         const twoFaEmail = fields[2]; 
-        // Fusha 3: Ingress User (p.sh. bambus.8.ipsos)
         const ingressUser = fields[3]; 
-        // Fusha 4: Ingress Pass (p.sh. ipsos10902)
         const ingressPass = fields[4]; 
-        // Fusha 5: WebMail Pass (p.sh. #Ipsos10902TT)
         const webMailPass = fields[5]; 
-        // Fusha 6: Pass WebMail 2FA (p.sh. deaw3e7457)
         const webMail2FaPass = fields[6]; 
-        // Fusha 7: SIP User (p.sh. 7457)
         const sipUser = fields[7]; 
-        // Fusha 8: SIP Pass (p.sh. Cae5reekixeey0uw)
         const sipPass = fields[8]; 
-        // Fusha 9: Shteti (p.sh. Germany) - Nuk përdoret në outputin final, por si fushë e dhënash
-        // const country = fields[9]; 
-        // Fusha 10: Emri i Përdoruesit (p.sh. Jan Steen)
+        // fields[9] është Shteti (Germany) - nuk përdoret direkt në output
+        
+        // Fusha 10: Emri i Përdoruesit (Jan Steen). Kjo tashmë duhet të jetë fusha e plotë falë ndryshimeve në handleConvert.
         const name = fields[10];
 
         // Formatimi i stringut të dëshiruar (duke ndjekur shembullin e fotos 2)
@@ -373,42 +365,65 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
         const errorElement = document.getElementById('errorMessage');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        // Përdor ' ' (hapësirë) si ndarës, pasi në foton tuaj duket se përdoret hapësira ose TAB.
-        // Për të qenë sa më i saktë, po i zëvendësoj të gjitha hapësirat me TAB përpara se të ndaj stringun.
-        // Nqs keni përdorur TAB (sepse e keni quajtur "tab-separated"), atëherë vetëm .split('\t') do të mjaftonte.
-        
-        // Për siguri, zëvendësojmë grupime të hapësirave ose TAB-eve me një TAB të vetëm dhe ndajmë me TAB.
         const rawInput = inputElement.value.trim();
-        const normalizedInput = rawInput.replace(/[\t\s]+/g, '\t'); // Normalizon hapësirat e shumta/TAB në një TAB
-        const fields = normalizedInput.split('\t').map(f => f.trim());
         
-        // Fsheh mesazhin e gabimit dhe butonin e shkarkimit
-        errorElement.style.display = 'none';
-        downloadBtn.style.display = 'none';
+        // Kjo është logjika kryesore e rregulluar: 
+        // Përdor .split(/\s{2,}|\t/) për të ndarë stringun bazuar në dy ose më shumë hapësira ose një TAB. 
+        // Kjo duhet të funksionojë nëse fushat ndahen me TAB ose me shumë hapësira.
 
+        // Mënyra më e sigurt për fushat e ndara me TAB, duke marrë parasysh që fusha e fundit mund të përmbajë hapësira (si emri):
+        // 1. Zëvendësojmë të gjitha grupimet e hapësirave me një TAB të vetëm, por vetëm NQS presim që inputi është tab-separated. 
+        // 2. Por, nëse përdoruesi ngjit direkt nga një Excel/sheet, TAB-i është ndarësi korrekt.
+        
+        // Le të supozojmë ndarjen me TAB ('\t') dhe përdorim limitin 11 për të kapur pjesën e mbetur si fushë 11 (Emri)
+        const fields = rawInput.split('\t');
+
+        // Pasi ndahen, ne duhet të trajtojmë rastin kur ndarja është bërë me hapësira (si në shembullin fillestar të inputit)
         if (fields.length < 11) {
-            errorElement.innerHTML = `Gabim: Duhet të ngjisni të paktën 11 fusha të ndara me TAB (ose hapësirë). Ju keni ngjitur ${fields.length}.`;
-            errorElement.style.display = 'block';
-            outputElement.innerText = "Error during conversion. Please check input format.";
+            // Tentojmë ndarjen me hapësira të shumta (ose si në foto)
+            // Kërkojmë për 10 ndarës duke përdorur RegEx, dhe pjesa e mbetur është fusha 11
+            const fieldsFromSpace = rawInput.match(/^([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+([^\t\s]+)[\t\s]+(.*)$/);
+
+            if (fieldsFromSpace && fieldsFromSpace.length === 12) {
+                // Fusha e parë (index 0) është stringu i plotë, ne duam vetëm ato pasardhëse (1 deri 11)
+                const formattedFields = fieldsFromSpace.slice(1, 12).map(f => f.trim());
+                if (formattedFields.length === 11) {
+                    processConversion(formattedFields);
+                    return;
+                }
+            } else {
+                 errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht 11 fusha të ndara me TAB (ose hapësirë). U gjetën ${fields.length} (ose gabim në formatin e hapësirave).`;
+                 errorElement.style.display = 'block';
+                 outputElement.innerText = "Error during conversion. Please check input format.";
+                 downloadBtn.style.display = 'none';
+                 return;
+            }
+        } else {
+            // Përdorim ndarjen me TAB nqs numri i fushave është ok
+            const finalFields = fields.map(f => f.trim());
+            processConversion(finalFields);
             return;
         }
 
-        try {
-            const formattedData = formatIpsos(fields);
-            
-            if (formattedData.startsWith("ERROR")) {
-                errorElement.innerHTML = formattedData.replace("ERROR: ", "");
-                errorElement.style.display = 'block';
-                outputElement.innerText = "Error during conversion. Please check input format.";
-            } else {
-                outputElement.innerText = formattedData;
-                downloadBtn.style.display = 'inline-flex';
-            }
+        function processConversion(fieldsArray) {
+            errorElement.style.display = 'none';
+            try {
+                const formattedData = formatIpsos(fieldsArray);
+                
+                if (formattedData.startsWith("ERROR")) {
+                    errorElement.innerHTML = formattedData.replace("ERROR: ", "");
+                    errorElement.style.display = 'block';
+                    outputElement.innerText = "Error during conversion. Please check input format.";
+                } else {
+                    outputElement.innerText = formattedData;
+                    downloadBtn.style.display = 'inline-flex';
+                }
 
-        } catch (e) {
-            errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
-            errorElement.style.display = 'block';
-            outputElement.innerText = "Internal error.";
+            } catch (e) {
+                errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
+                errorElement.style.display = 'block';
+                outputElement.innerText = "Internal error.";
+            }
         }
     }
 
@@ -434,12 +449,10 @@ EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
 
     // Vendosja e përmbajtjes fillestare
     document.addEventListener('DOMContentLoaded', () => {
-        // Simulo konvertimin me shembullin e dhënë në foton tuaj, për të shfaqur outputin kur ngarkohet faqja.
+        // Shembulli i inputit me TAB-a, me emër me hapësirë.
         const exampleInput = "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen";
         document.getElementById('dataInput').value = exampleInput;
-        // Për shkak se nuk mund të thërrasim handleConvert drejtpërdrejt, po vendosim një shembull statik outputi fillimisht.
-        // Përdoruesi do ta shtypë butonin "Convert Data" për të parë rezultatin real.
-        // OSE thirret handleConvert kur ngarkohet DOM:
+        // Thërrasim funksionin për të shfaqur outputin fillestar
         handleConvert();
     });
 
