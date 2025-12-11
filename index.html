@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>User Formatter Modern UI</title>
+  <title>User Formatter </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -282,6 +282,8 @@
         margin-top: 15px;
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
     }
 
     button { 
@@ -299,19 +301,27 @@
     button:hover { background: var(--accent-hover); transform: translateY(-1px); }
     button:active { transform: translateY(0); }
     
-    .hint-button {
-        background: #f97316; /* Orange color for distinction */
-        box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
-        flex-shrink: 0;
-        height: 120px; /* Match textarea height */
+    /* Hint Icon Button Styles */
+    .hint-icon-btn {
+        background: transparent;
+        color: #f97316;
+        border: none;
+        padding: 8px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: color 0.2s, transform 0.1s;
+        box-shadow: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
-        padding: 10px;
-        width: 100px;
     }
-    .hint-button:hover { background: #ea580c; }
+    .hint-icon-btn:hover {
+        color: #ea580c;
+        transform: scale(1.1);
+        background: rgba(249, 115, 22, 0.1);
+        border-radius: 50%;
+    }
+    .hint-icon-btn:active { transform: scale(1.0); }
 
 
     .output-container {
@@ -375,7 +385,7 @@
 
     /* --- Modal/Hint Styles --- */
     .modal {
-        display: none; /* Hidden by default */
+        display: none;
         position: fixed; 
         z-index: 2000; 
         left: 0;
@@ -390,7 +400,7 @@
 
     .modal-content {
         background-color: #fefefe;
-        margin: 5% auto; /* 5% from the top and centered */
+        margin: 5% auto;
         padding: 30px;
         border-radius: 12px;
         width: 90%; 
@@ -461,11 +471,14 @@
         .input-row {
             flex-direction: column;
         }
-        .hint-button {
-            height: 40px;
-            width: 100%;
-            margin-top: 15px;
+        .hint-icon-btn {
+            margin-top: 0;
+            align-self: flex-start;
         }
+        .action-bar {
+            justify-content: space-between;
+        }
+
         .modal-content {
             margin: 10% auto;
             width: 95%;
@@ -522,7 +535,7 @@
         <div class="nav-links">
             <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
             <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
-            <a href="#" data-project="abh" class="link-abh active">ABH</a> 
+            <a href="#" data-project="abh" class="link-abh">ABH</a> 
             <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
         </div>
     </div>
@@ -530,6 +543,7 @@
     <div class="content">
         <div class="card">
             <h2 id="projectTitle">
+                <!-- Ky titull do të përditësohet nga JavaScript -->
                 ABH Formatter
                 <span id="projectStatus" class="status-badge status-active">Aktiv</span>
             </h2>
@@ -548,12 +562,11 @@
                         <div class="input-area">
                             <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
                         </div>
-                        <!-- Hint button added here -->
-                        <button type="button" id="hintBtn" class="hint-button" style="display: none;" onclick="openModal()">
-                            Udhëzime Setup
-                        </button>
                     </div>
                     <div class="action-bar">
+                        <button type="button" id="hintBtn" class="hint-icon-btn" style="display: none;" onclick="openModal()">
+                            💡
+                        </button>
                         <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
                     </div>
                 </form>
@@ -575,13 +588,12 @@
   </div>
 
 <script>
-    let currentProject = 'abh';
+    let currentProject = 'ipsos'; 
     const AUTH_KEY = 'formatter_auth_token';
     const VALID_USER = 'admin';
     const VALID_PASS = 'bukibuki';
 
     function setAuthToken(token) {
-        // Set the cookie for 7 days
         document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
     }
 
@@ -864,7 +876,7 @@ ABH Domain: eu.sip.ssl17.net`;
             outputContent.innerText = "Duke pritur për të dhëna...";
             errorElement.style.display = 'none';
             
-            // Show/Hide Hint Button based on project config
+            // Show/Hide Hint Icon Button based on project config
             hintBtn.style.display = projectConfig.showHint ? 'flex' : 'none';
 
             // Run conversion immediately to show the formatted placeholder data
@@ -884,7 +896,7 @@ ABH Domain: eu.sip.ssl17.net`;
             dataInput.placeholder = inactiveMessage.textContent;
             outputContent.innerText = "";
             
-            hintBtn.style.display = 'none'; // Hide hint for inactive projects
+            hintBtn.style.display = 'none'; 
         }
     }
 
@@ -913,8 +925,15 @@ ABH Domain: eu.sip.ssl17.net`;
             link.addEventListener('click', handleProjectSwitch); 
         });
 
-        // Set initial project to 'abh' and update content
-        updateMainContent('abh');
+        const initialProject = 'ipsos';
+        currentProject = initialProject;
+
+        const initialLink = document.querySelector(`.sidebar a[data-project="${initialProject}"]`);
+        if (initialLink) {
+            initialLink.classList.add('active');
+        }
+
+        updateMainContent(initialProject); 
     }
 
     document.addEventListener('DOMContentLoaded', () => {
