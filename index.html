@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>User Formatter </title>
+  <title>User Formatter Modern UI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -31,82 +31,6 @@
         transition: opacity 0.3s ease;
     }
 
-    /* --- Login Screen Styles --- */
-    #loginScreen {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--bg-color);
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .login-card {
-        background: var(--card-bg);
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-    }
-
-    .login-card h3 {
-        color: var(--accent-color);
-        margin-bottom: 30px;
-        font-weight: 700;
-        font-size: 1.8rem;
-    }
-
-    .login-group {
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    .login-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: var(--text-main);
-        font-size: 0.9rem;
-    }
-
-    .login-group input {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        box-sizing: border-box;
-        font-size: 1rem;
-        transition: border-color 0.2s;
-    }
-    
-    .login-group input:focus {
-        border-color: var(--accent-color);
-        outline: none;
-    }
-
-    #loginError {
-        color: #dc2626;
-        background: #fee2e2;
-        padding: 10px;
-        border-radius: 6px;
-        margin-bottom: 15px;
-        display: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .login-button {
-        width: 100%;
-        margin-top: 10px;
-        font-size: 1.1rem;
-    }
-    
     /* --- Sidebar Styles --- */
     .sidebar {
       width: 280px; 
@@ -505,28 +429,8 @@
     </div>
   </div>
   
-  <div id="loginScreen">
-    <div class="login-card">
-        <h3>PROJECT GENERATOR</h3>
-        
-        <div id="loginError"></div>
-
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="login-group">
-                <label for="username">Përdoruesi (Username):</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="login-group">
-                <label for="password">Fjalëkalimi (Password):</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="login-button">Hyr</button>
-        </form>
-    </div>
-  </div>
-
-
-  <div id="appContainer" style="display: none;">
+  <!-- App Container: Tani shfaqet direkt -->
+  <div id="appContainer">
     <div class="sidebar">
         <div class="logo-area">
             <h3>PROJECT GENERATOR</h3>
@@ -543,7 +447,6 @@
     <div class="content">
         <div class="card">
             <h2 id="projectTitle">
-                <!-- Ky titull do të përditësohet nga JavaScript -->
                 ABH Formatter
                 <span id="projectStatus" class="status-badge status-active">Aktiv</span>
             </h2>
@@ -589,56 +492,6 @@
 
 <script>
     let currentProject = 'ipsos'; 
-    const AUTH_KEY = 'formatter_auth_token';
-    const VALID_USER = 'admin';
-    const VALID_PASS = 'bukibuki';
-
-    function setAuthToken(token) {
-        document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
-    }
-
-    function getAuthToken() {
-        const name = AUTH_KEY + "=";
-        const decodedCookie = decodeURIComponent(document.cookie);
-        const ca = decodedCookie.split(';');
-        for(let i = 0; i <ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) === 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
-    function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorElement = document.getElementById('loginError');
-
-        if (username === VALID_USER && password === VALID_PASS) {
-            setAuthToken('logged_in_true');
-            showDashboard();
-        } else {
-            errorElement.textContent = "Përdoruesi ose fjalëkalimi është i pasaktë.";
-            errorElement.style.display = 'block';
-        }
-    }
-
-    function showDashboard() {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        initializeDashboard(); 
-    }
-
-    function showLogin() {
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('appContainer').style.display = 'none';
-    }
-
 
     const PROJECTS_CONFIG = {
         'ipsos': {
@@ -937,11 +790,8 @@ ABH Domain: eu.sip.ssl17.net`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        if (getAuthToken() === 'logged_in_true') {
-            showDashboard();
-        } else {
-            showLogin();
-        }
+        // Tani thërret direkt initializeDashboard, duke anashkaluar kontrollin e kyçjes
+        initializeDashboard(); 
     });
 
 </script>
