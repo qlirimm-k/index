@@ -1,127 +1,949 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>User Formatter</title>
+  <title>User Formatter </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- STYLES: IDENTIKE, PA PREKJE -->
-  <!-- (Styles janë të njëjta si te kodi yt, nuk i kam ndryshuar) -->
-</head>
+  <style>
+    :root {
+        --sidebar-bg: #1e293b;
+        --sidebar-text: #e2e8f0;
+        --accent-color: #3b82f6;
+        --accent-hover: #2563eb;
+        --bg-color: #f1f5f9;
+        --card-bg: #ffffff;
+        --text-main: #334155;
+    }
 
+    body { 
+        font-family: 'Inter', sans-serif; 
+        margin: 0; 
+        display: flex; 
+        height: 100vh; 
+        background-color: var(--bg-color); 
+        color: var(--text-main);
+    }
+    
+    #appContainer {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.3s ease;
+    }
+
+    /* --- Login Screen Styles --- */
+    #loginScreen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .login-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .login-card h3 {
+        color: var(--accent-color);
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+
+    .login-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .login-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.9rem;
+    }
+
+    .login-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    .login-group input:focus {
+        border-color: var(--accent-color);
+        outline: none;
+    }
+
+    #loginError {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        display: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .login-button {
+        width: 100%;
+        margin-top: 10px;
+        font-size: 1.1rem;
+    }
+    
+    /* --- Sidebar Styles --- */
+    .sidebar {
+      width: 280px; 
+      background: var(--sidebar-bg); 
+      color: var(--sidebar-text); 
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+      flex-shrink: 0;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+    }
+    
+    .logo-area {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+    }
+
+    .logo-area h3 { 
+      color: #fff; 
+      margin: 0; 
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      color: #94a3b8; 
+      text-decoration: none; 
+      padding: 12px 16px; 
+      font-size: 14px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar a:hover { 
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      transform: translateX(3px);
+    }
+
+    .sidebar a.active {
+      background: var(--accent-color);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar a::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: currentColor;
+        border-radius: 50%;
+        margin-right: 12px;
+        opacity: 0.5;
+    }
+    .sidebar a.active::before { opacity: 1; background-color: #fff; }
+
+    /* --- Content and Card Styles --- */
+    .content { 
+        flex: 1; 
+        padding: 40px; 
+        overflow-y: auto; 
+    }
+
+    .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    h2 { 
+        margin-top: 0; 
+        color: var(--text-main); 
+        font-size: 1.5rem;
+        border-bottom: 2px solid #f1f5f9; 
+        padding-bottom: 15px; 
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-inactive {
+        background: #ffe4e6;
+        color: #be123c;
+    }
+
+    #formatterContainer {
+        transition: opacity 0.3s ease;
+    }
+
+    #inactiveMessage {
+        padding: 30px;
+        border: 2px solid #fca5a5;
+        background: #fee2e2;
+        color: #dc2626;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-top: 25px;
+        display: none;
+    }
+
+    /* --- Form and Output Styles --- */
+    .input-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .input-area {
+        flex-grow: 1;
+    }
+
+    textarea { 
+        width: 100%; 
+        height: 120px; 
+        padding: 15px; 
+        background: #f8fafc;
+        border: 2px solid #e2e8f0; 
+        border-radius: 8px; 
+        font-family: 'Courier New', monospace; 
+        font-size: 14px;
+        color: #334155;
+        resize: vertical;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+        white-space: pre-wrap; 
+        line-height: 1.8;
+    }
+    
+    textarea:focus { 
+        border-color: var(--accent-color); 
+        outline: none; 
+        background: #fff;
+    }
+
+    .action-bar {
+        margin-top: 15px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    button { 
+      padding: 10px 24px; 
+      background: var(--accent-color); 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 15px; 
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+    button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    
+    /* Hint Icon Button Styles */
+    .hint-icon-btn {
+        background: transparent;
+        color: #f97316;
+        border: none;
+        padding: 8px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: color 0.2s, transform 0.1s;
+        box-shadow: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .hint-icon-btn:hover {
+        color: #ea580c;
+        transform: scale(1.1);
+        background: rgba(249, 115, 22, 0.1);
+        border-radius: 50%;
+    }
+    .hint-icon-btn:active { transform: scale(1.0); }
+
+
+    .output-container {
+        margin-top: 30px;
+        background: #1e293b;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .output-header {
+        background: #0f172a;
+        padding: 8px 15px;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .output-content {
+        padding: 20px;
+        color: #e2e8f0;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.5;
+        min-height: 150px;
+        overflow-x: auto;
+    }
+
+    .download-btn {
+        background: #10b981;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        margin-left: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        padding: 0 20px;
+        border-radius: 6px;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .download-btn:hover { background: #059669; }
+
+    .helper-text { font-size: 0.9rem; color: #64748b; margin-bottom: 8px; }
+    
+    .error-message {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        border: 1px solid #fca5a5;
+        font-weight: 500;
+        display: none;
+    }
+
+    /* --- Modal/Hint Styles --- */
+    .modal {
+        display: none;
+        position: fixed; 
+        z-index: 2000; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0,0,0,0.6); 
+        padding-top: 50px;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 30px;
+        border-radius: 12px;
+        width: 90%; 
+        max-width: 600px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h4 {
+        color: var(--accent-color);
+        margin-top: 0;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+    }
+
+    .modal-content ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .modal-content ul li {
+        margin-bottom: 15px;
+        padding-left: 20px;
+        position: relative;
+        line-height: 1.6;
+        color: var(--text-main);
+        font-size: 15px;
+    }
+    
+    .modal-content ul li::before {
+        content: '•'; 
+        color: #10b981; 
+        font-weight: bold; 
+        display: inline-block; 
+        width: 1em;
+        margin-left: -1em;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: var(--accent-color);
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            max-height: 150px;
+            overflow-x: auto;
+            flex-direction: row;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .logo-area { display: none; }
+        .nav-links { flex-direction: row; }
+        .content { padding: 20px; }
+        .sidebar a { padding: 8px 10px; margin-right: 5px; }
+        
+        .input-row {
+            flex-direction: column;
+        }
+        .hint-icon-btn {
+            margin-top: 0;
+            align-self: flex-start;
+        }
+        .action-bar {
+            justify-content: space-between;
+        }
+
+        .modal-content {
+            margin: 10% auto;
+            width: 95%;
+        }
+    }
+
+  </style>
+</head>
 <body>
 
-  <!-- Modal / Hint -->
+  <!-- Modal/Hint Pop-up -->
   <div id="hintModal" class="modal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal()">&times;</span>
       <h4>Udhëzime: Si të bëhet Setup projekti IPSOS</h4>
+      <p style="font-style: italic; color: #64748b;">Këta janë hapat thelbësorë për konfigurimin e llogarisë së re të agjentit.</p>
       <ul>
-        <li>Instaloni Cisco VPN</li>
-        <li>Përdorni VPN User / Pass</li>
-        <li>Instaloni Xlite dhe SIP credentials</li>
-        <li>Vendosni 2FA për WebMail</li>
+        <li>Instaloni (ose sigurohuni që është i instaluar) setup-i **Cisco VPN** në kompjuterin e agjentit.</li>
+        <li>Përdorni të dhënat e gjeneruara nga kjo vegël për **VPN User** dhe **VPN Pass** për t'u kyçur.</li>
+        <li>Instaloni **Xlite** (ose soft phone tjetër sipas kërkesës) dhe bëni setup llogarinë SIP duke përdorur **SIP User** dhe **SIP Pass**.</li>
+        <li>Vendosni linkun e **WebMail** në Chrome dhe përdoreni atë (duke u kyçur) për të vendosur **2FA** për konfigurimin e Cisco VPN.</li>
       </ul>
+      <p style="font-size: 0.85rem; color: #94a3b8;">*Të dhënat specifike (User/Pass) merren nga seksioni 'REZULTATI I GJENERUAR'.</p>
+    </div>
+  </div>
+  
+  <div id="loginScreen">
+    <div class="login-card">
+        <h3>PROJECT GENERATOR</h3>
+        
+        <div id="loginError"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="login-group">
+                <label for="username">Përdoruesi (Username):</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="login-group">
+                <label for="password">Fjalëkalimi (Password):</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-button">Hyr</button>
+        </form>
     </div>
   </div>
 
-  <!-- APP CONTAINER (tani hapet direkt) -->
-  <div id="appContainer">
+
+  <div id="appContainer" style="display: none;">
     <div class="sidebar">
-      <div class="logo-area">
-        <h3>PROJECT GENERATOR</h3>
-      </div>
-      <div class="nav-links">
-        <a href="#" data-project="ipsos">Ipsos</a>
-        <a href="#" data-project="usuma">Usuma</a>
-        <a href="#" data-project="abh">ABH</a>
-        <a href="#" data-project="leyhausen">Leyhausen</a>
-      </div>
+        <div class="logo-area">
+            <h3>PROJECT GENERATOR</h3>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" data-project="ipsos" class="link-ipsos">Ipsos</a>
+            <a href="#" data-project="usuma" class="link-usuma">Usuma</a>
+            <a href="#" data-project="abh" class="link-abh">ABH</a> 
+            <a href="#" data-project="leyhausen" class="link-leyhausen">Leyhausen</a>
+        </div>
     </div>
 
     <div class="content">
-      <div class="card">
-        <h2 id="projectTitle">
-          Formatter
-          <span id="projectStatus" class="status-badge status-active">Aktiv</span>
-        </h2>
-
-        <div id="inactiveMessage" style="display:none;"></div>
-
-        <div id="formatterContainer">
-          <div id="errorMessage" class="error-message"></div>
-          <p id="helperText" class="helper-text"></p>
-
-          <textarea id="dataInput"></textarea>
-
-          <div class="action-bar">
-            <button id="hintBtn" class="hint-icon-btn" style="display:none;" onclick="openModal()">💡</button>
-            <button onclick="handleConvert()">Konverto Të Dhënat</button>
-          </div>
-
-          <div class="output-container">
-            <div class="output-header">
-              <span>REZULTATI I GJENERUAR</span>
+        <div class="card">
+            <h2 id="projectTitle">
+                <!-- Ky titull do të përditësohet nga JavaScript -->
+                ABH Formatter
+                <span id="projectStatus" class="status-badge status-active">Aktiv</span>
+            </h2>
+            
+            <div id="inactiveMessage" style="display: none;">
+                Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.
             </div>
-            <div id="outputContent" class="output-content">Duke pritur për të dhëna...</div>
-          </div>
 
-          <div style="margin-top:20px;text-align:right;">
-            <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display:none;">Shkarko .txt</a>
-          </div>
+            <div id="formatterContainer">
+                <div id="errorMessage" class="error-message"></div>
+
+                <p id="helperText" class="helper-text">Ngjisni stringun e përdoruesit të ndarë me TAB këtu.</p>
+                
+                <form onsubmit="return false;">
+                    <div class="input-row">
+                        <div class="input-area">
+                            <textarea id="dataInput" placeholder="Emine Ibishi	Agent_Bambus16	Bambus16	935912	E4}s4%L1|"></textarea>
+                        </div>
+                    </div>
+                    <div class="action-bar">
+                        <button type="button" id="hintBtn" class="hint-icon-btn" style="display: none;" onclick="openModal()">
+                            💡
+                        </button>
+                        <button type="button" onclick="handleConvert()">Konverto Të Dhënat</button>
+                    </div>
+                </form>
+
+                <div class="output-container">
+                    <div class="output-header">
+                        <span>REZULTATI I GJENERUAR</span>
+                        <span style="font-size: 10px; opacity: 0.7;">FORMATI TXT</span>
+                    </div>
+                    <div id="outputContent" class="output-content">Duke pritur për të dhëna...</div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <a href="#" id="downloadBtn" class="download-btn" onclick="downloadTxt()" style="display: none;">Shkarko .txt</a>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   </div>
 
 <script>
-/* ======================
-   ASGJË NGA FORMATIMI
-   NUK ËSHTË PREKUR
-====================== */
+    let currentProject = 'ipsos'; 
+    const AUTH_KEY = 'formatter_auth_token';
+    const VALID_USER = 'admin';
+    const VALID_PASS = 'bukibuki';
 
-let currentProject = 'ipsos';
+    function setAuthToken(token) {
+        document.cookie = `${AUTH_KEY}=${token}; max-age=${60 * 60 * 24 * 7}; path=/`; 
+    }
 
-const PROJECTS_CONFIG = {
-  ipsos: {
-    fieldsCount: 11,
-    helper: "Ngjisni stringun e ndarë me TAB (11 fusha)",
-    placeholder: "10902.ips...\t...",
-    converter: formatIpsos,
-    fileNamePrefix: "_data",
-    showHint: true
-  },
-  abh: {
-    fieldsCount: 5,
-    helper: "Ngjisni stringun e ndarë me TAB (5 fusha)",
-    placeholder: "Emine...\t...",
-    converter: formatABH,
-    fileNamePrefix: "",
-    showHint: false
-  },
-  usuma: { converter: null },
-  leyhausen: { converter: null }
-};
+    function getAuthToken() {
+        const name = AUTH_KEY + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
 
-function formatIpsos(fields) { /* IDENTIKE */ return fields.join("\n"); }
-function formatABH(fields) { return fields.join("\n"); }
+    function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorElement = document.getElementById('loginError');
 
-/* --- FUNKSIONET TUA ORIGJINALE --- */
-function handleConvert() { /* identike */ }
-function downloadTxt() { /* identike */ }
-function handleProjectSwitch(e) { /* identike */ }
-function updateMainContent(p) { /* identike */ }
+        if (username === VALID_USER && password === VALID_PASS) {
+            setAuthToken('logged_in_true');
+            showDashboard();
+        } else {
+            errorElement.textContent = "Përdoruesi ose fjalëkalimi është i pasaktë.";
+            errorElement.style.display = 'block';
+        }
+    }
 
-function initializeDashboard() {
-  document.querySelectorAll('.sidebar a').forEach(a=>{
-    a.addEventListener('click',handleProjectSwitch);
-  });
-  updateMainContent('ipsos');
-}
+    function showDashboard() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        initializeDashboard(); 
+    }
 
-function openModal(){ document.getElementById('hintModal').style.display='block'; }
-function closeModal(){ document.getElementById('hintModal').style.display='none'; }
+    function showLogin() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+    }
 
-document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+    const PROJECTS_CONFIG = {
+        'ipsos': {
+            fieldsCount: 11,
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (11 fusha: VPN_User, VPN_Pass, 2FA_Email, Ingress_User, Ingress_Pass, WebMail_Pass, WebMail_2FA_Pass, SIP_User, SIP_Pass, Shteti, Emri):",
+            placeholder: "10902.ips.de.intvwr\tp?2C4m0u1l\tbambus.8@bambusacademy.com\tbambus.8.ipsos\tipsos10902\t#Ipsos10902TT\tdeaw3e7457\t7457\tCae5reekixeey0uw\tGermany\tJan Steen",
+            converter: formatIpsos,
+            fileNamePrefix: '_data',
+            showHint: true
+        },
+        'abh': {
+            fieldsCount: 5,
+            helper: "Ngjisni stringun e përdoruesit të ndarë me TAB këtu (5 fusha: Emri, ABH_User, ABH_Pass, IAX_Ext, IAX_Pass):",
+            placeholder: "Emine Ibishi\tAgent_Bambus16\tBambus16\t935912\tE4}s4%L1|",
+            converter: formatABH,
+            fileNamePrefix: '',
+            showHint: false
+        },
+        'usuma': {
+            fieldsCount: 7,
+            helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
+            placeholder: "Ky projekt nuk është aktiv.",
+            converter: null,
+            fileNamePrefix: '_usuma_data',
+            showHint: false
+        },
+        'leyhausen': {
+            fieldsCount: 6,
+            helper: "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.",
+            placeholder: "Ky projekt nuk është aktiv.",
+            converter: null,
+            fileNamePrefix: '_leyhausen_user',
+            showHint: false
+        },
+    };
+
+
+    function formatIpsos(fields) {
+        if (fields.length !== 11) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 11, u gjetën ${fields.length}.`;
+        }
+
+        const vpnUser = fields[0]; 
+        const vpnPass = fields[1]; 
+        const twoFaEmail = fields[2]; 
+        const ingressUser = fields[3]; 
+        const ingressPass = fields[4]; 
+        const webMailPass = fields[5]; 
+        // fields[6] is WebMail_2FA_Pass, which is ignored in output
+        const sipUser = fields[7]; 
+        const sipPass = fields[8]; 
+        // fields[9] is Shteti (Country), which is ignored in output
+        const name = fields[10];
+
+        const output = 
+`Name: ${name}
+
+----VPN----
+User: ${vpnUser}
+Pass: ${vpnPass}
+2FA e-Mail: ${twoFaEmail}
+
+----Ingress----
+User: ${ingressUser}
+Pass: ${ingressPass}
+
+----SIP(Xlite)----
+User Name: ${sipUser}
+Password: ${sipPass}
+Soft Phone Domain IP: 172.16.12.8
+
+----WebMail----
+2FA e-Mail: ${twoFaEmail}
+Password: ${webMailPass}@
+WebMail login page: https://sxb1plzcpnl489552.prod.sxb1.secureserver.net:2096/
+
+----Ingress Interview login page----
+EMA Server Link: https://d534ema.keyingress.de/
+EMA 2FA VPN: emeavpn01.ipsos.com/2fa`;
+
+        return output;
+    }
+
+    function formatABH(fields) {
+        if (fields.length !== 5) {
+            return `ERROR: Numri i fushave të ndara me TAB është i pasaktë. Priten saktësisht 5 fusha, u gjetën ${fields.length}.`;
+        }
+
+        const name = fields[0];
+        const abhUser = fields[1];
+        const abhPass = fields[2];
+        const iaxExt = fields[3];
+        const iaxPass = fields[4];
+
+        const output = 
+`Name:  ${name}
+
+--------------------------------------
+ABH Login Details
+Username:  ${abhUser}
+Password:  ${abhPass}
+--------------------------------------
+IAX Extension:  ${iaxExt}
+Password:  ${iaxPass}
+ABH Domain: eu.sip.ssl17.net`;
+        
+        return output;
+    }
+    
+    function handleConvert() {
+        const projectConfig = PROJECTS_CONFIG[currentProject];
+
+        if (!projectConfig || !projectConfig.converter) {
+            return;
+        }
+
+        const inputElement = document.getElementById('dataInput');
+        const outputElement = document.getElementById('outputContent');
+        const errorElement = document.getElementById('errorMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const rawInput = inputElement.value;
+        
+        let fields = rawInput.split('\t').map(f => f.trim());
+        
+        // Handle trailing tab that results in an empty string at the end of the array
+        if (fields.length > projectConfig.fieldsCount && fields[fields.length - 1] === '') {
+            fields.pop();
+        }
+
+        if (fields.length !== projectConfig.fieldsCount) {
+             errorElement.innerHTML = `Gabim: Duhet të ngjisni saktësisht ${projectConfig.fieldsCount} fusha të ndara me TAB. U gjetën ${fields.length}.`;
+             errorElement.style.display = 'block';
+             outputElement.innerText = "Error during conversion. Please check input format.";
+             downloadBtn.style.display = 'none';
+             return;
+        }
+
+        errorElement.style.display = 'none';
+        try {
+            const formattedData = projectConfig.converter(fields);
+            
+            if (formattedData.startsWith("ERROR")) {
+                // If converter returns a formatted error string
+                errorElement.innerHTML = formattedData.replace("ERROR: ", "");
+                errorElement.style.display = 'block';
+                outputElement.innerText = "Error during conversion. Please check input format.";
+                downloadBtn.style.display = 'none';
+            } else {
+                outputElement.innerText = formattedData;
+                downloadBtn.style.display = 'inline-flex';
+            }
+
+        } catch (e) {
+            // Catch unexpected runtime errors
+            errorElement.innerHTML = "Një gabim i papritur ndodhi gjatë formatimit: " + e.message;
+            errorElement.style.display = 'block';
+            outputContent.innerText = "Internal error.";
+            downloadBtn.style.display = 'none';
+        }
+    }
+
+    function downloadTxt() {
+        const outputContent = document.getElementById('outputContent').innerText;
+        const projectConfig = PROJECTS_CONFIG[currentProject] || { fileNamePrefix: 'formatted_data' };
+        
+        // Try to extract the user's name for a better file name
+        const nameMatch = outputContent.match(/Name:\s+(.*)\n/);
+        const defaultName = 'formatted_user';
+        let baseName = (nameMatch && nameMatch[1].trim()) ? nameMatch[1].trim().replace(/\s+/g, '_') : defaultName;
+
+        const fileName = `${baseName}${projectConfig.fileNamePrefix}.txt`;
+        
+        // Create a downloadable blob
+        const blob = new Blob([outputContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function handleProjectSwitch(event) {
+        event.preventDefault();
+        const targetLink = event.currentTarget;
+        const projectId = targetLink.getAttribute('data-project');
+        
+        // Update active class for sidebar links
+        const links = document.querySelectorAll('.sidebar a');
+        links.forEach(link => link.classList.remove('active'));
+        targetLink.classList.add('active');
+
+        currentProject = projectId;
+        updateMainContent(projectId);
+    }
+
+    function updateMainContent(projectId) {
+        const titleElement = document.getElementById('projectTitle');
+        const formatterContainer = document.getElementById('formatterContainer');
+        const inactiveMessage = document.getElementById('inactiveMessage');
+        const dataInput = document.getElementById('dataInput');
+        const helperText = document.getElementById('helperText');
+        const outputContent = document.getElementById('outputContent');
+        const errorElement = document.getElementById('errorMessage');
+        const hintBtn = document.getElementById('hintBtn');
+
+        const projectName = document.querySelector(`.sidebar a[data-project="${projectId}"]`).textContent;
+
+        // Update main title and status badge structure
+        titleElement.innerHTML = `${projectName} Formatter <span id="projectStatus" class="status-badge"></span>`;
+        const newStatusBadge = document.getElementById('projectStatus');
+        
+        const projectConfig = PROJECTS_CONFIG[projectId];
+        
+        inactiveMessage.textContent = "Ky projekt nuk është aktiv. Konvertimi i të dhënave nuk është i mundur.";
+
+
+        if (projectConfig && projectConfig.converter) {
+            // Project is active
+            newStatusBadge.textContent = 'Aktiv';
+            newStatusBadge.classList.remove('status-inactive');
+            newStatusBadge.classList.add('status-active');
+            
+            formatterContainer.style.display = 'block';
+            inactiveMessage.style.display = 'none';
+
+            helperText.textContent = projectConfig.helper;
+            dataInput.value = projectConfig.placeholder;
+            dataInput.placeholder = "Ngjisni rreshtin e të dhënave këtu...";
+            
+            outputContent.innerText = "Duke pritur për të dhëna...";
+            errorElement.style.display = 'none';
+            
+            // Show/Hide Hint Icon Button based on project config
+            hintBtn.style.display = projectConfig.showHint ? 'flex' : 'none';
+
+            // Run conversion immediately to show the formatted placeholder data
+            handleConvert();
+
+        } else {
+            // Project is inactive
+            newStatusBadge.textContent = 'Joaktiv';
+            newStatusBadge.classList.remove('status-active');
+            newStatusBadge.classList.add('status-inactive');
+            
+            formatterContainer.style.display = 'none';
+            inactiveMessage.style.display = 'block';
+            
+            helperText.textContent = inactiveMessage.textContent;
+            dataInput.value = '';
+            dataInput.placeholder = inactiveMessage.textContent;
+            outputContent.innerText = "";
+            
+            hintBtn.style.display = 'none'; 
+        }
+    }
+
+    // Modal functions
+    function openModal() {
+        document.getElementById('hintModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('hintModal').style.display = 'none';
+    }
+
+    // Close modal if user clicks outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('hintModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+
+    function initializeDashboard() {
+        const links = document.querySelectorAll('.sidebar a');
+        links.forEach(link => {
+            link.removeEventListener('click', handleProjectSwitch); 
+            link.addEventListener('click', handleProjectSwitch); 
+        });
+
+        const initialProject = 'ipsos';
+        currentProject = initialProject;
+
+        const initialLink = document.querySelector(`.sidebar a[data-project="${initialProject}"]`);
+        if (initialLink) {
+            initialLink.classList.add('active');
+        }
+
+        updateMainContent(initialProject); 
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (getAuthToken() === 'logged_in_true') {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    });
+
 </script>
 
 </body>
